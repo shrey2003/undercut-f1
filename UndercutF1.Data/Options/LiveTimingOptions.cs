@@ -6,18 +6,6 @@ namespace UndercutF1.Data;
 public record LiveTimingOptions
 {
     /// <summary>
-    /// Try to conform to Windows/XDG directory standards by default.
-    /// <see cref="Environment.SpecialFolder.ApplicationData"/> will return <c>%APPDATA%</c> on Windows,
-    /// <c>$XDG_CONFIG_HOME</c> or <c>~/.config</c> on Linux/Mac.
-    /// </summary>
-    ///
-    /// <returns>
-    /// <c>%APPDATA%/undercut-f1/config.json</c> on Windows,
-    /// <c>$XDG_CONFIG_HOME/undercut-f1/config.json</c> or <c>~/.config/undercut-f1/config.json</c> on Mac/Linux.
-    /// </returns>
-    public static string ConfigFilePath => GetConfigFilePath();
-
-    /// <summary>
     /// The directory to read and store live timing data for simulations.
     /// When live sessions are being listened to, all data received will be recorded in this directory.
     /// This is also the directory that imported data is saved to.
@@ -51,34 +39,6 @@ public record LiveTimingOptions
     /// UndercutF1.Console implements these notifications as <c>BEL</c>s sent to your terminal, resulting in an audible beep.
     /// </summary>
     public bool Notify { get; set; } = true;
-
-    private static string GetConfigFilePath()
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            return Path.Join(
-                Environment.GetFolderPath(
-                    Environment.SpecialFolder.ApplicationData,
-                    Environment.SpecialFolderOption.Create
-                ),
-                "undercut-f1",
-                "config.json"
-            );
-        }
-        else
-        {
-            var xdgConfigDirectory = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
-            if (string.IsNullOrWhiteSpace(xdgConfigDirectory))
-            {
-                xdgConfigDirectory = Path.Join(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    ".config"
-                );
-            }
-
-            return Path.Join(xdgConfigDirectory, "undercut-f1", "config.json");
-        }
-    }
 
     /// <summary>
     /// Try to conform to Windows/XDG directory standards by default.
