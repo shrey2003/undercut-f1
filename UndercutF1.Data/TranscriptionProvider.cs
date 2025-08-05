@@ -9,7 +9,7 @@ namespace UndercutF1.Data;
 /// <summary>
 /// Uses Whisper.net to provide transcription for files.
 /// Used for transcribing drivers team radio messages.
-/// </summary
+/// </summary>
 public class TranscriptionProvider(
     IOptions<LiveTimingOptions> options,
     ILogger<TranscriptionProvider> logger

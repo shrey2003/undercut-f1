@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using TextCopy;
 using UndercutF1.Data;
 
@@ -11,15 +10,6 @@ public class CopyToClipboardInputHandler(
     State state
 ) : IInputHandler
 {
-    private static readonly JsonSerializerOptions _jsonSerializerOptions = new(
-        JsonSerializerDefaults.Web
-    )
-    {
-        AllowTrailingCommas = true,
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     public bool IsEnabled => true;
 
     public Screen[] ApplicableScreens => [Screen.DebugData];
@@ -46,7 +36,7 @@ public class CopyToClipboardInputHandler(
         if (latestDataPoint is null)
             return;
 
-        var serialized = JsonSerializer.Serialize(latestDataPoint, _jsonSerializerOptions);
+        var serialized = JsonSerializer.Serialize(latestDataPoint, Constants.JsonSerializerOptions);
         await clipboard.SetTextAsync(serialized, cancellationToken);
     }
 }

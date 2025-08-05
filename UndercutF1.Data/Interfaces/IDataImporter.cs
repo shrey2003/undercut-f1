@@ -20,11 +20,11 @@ public interface IDataImporter
     Task ImportSessionAsync(int year, int meetingKey, int sessionKey);
 
     /// <summary>
-    /// Imports all the live timing data for the provided <paramref name="session"/>,
+    /// Imports all the live timing data for the provided <paramref name="sessionKey"/>,
     /// in to the <see cref="LiveTimingOptions.DataDirectory"/>.
     /// </summary>
     /// <param name="meeting">The <see cref="ListMeetingsApiResponse.Meeting"/> which contains the session to import data for.</param>
-    /// <param name="session">The key of the session inside the meeting to import data for.</param>
+    /// <param name="sessionKey">The key of the session inside the meeting to import data for.</param>
     /// <returns>A <see cref="Task"/> representing the status of the import.</returns>
     Task ImportSessionAsync(int year, ListMeetingsApiResponse.Meeting meeting, int sessionKey);
 }

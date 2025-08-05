@@ -19,6 +19,6 @@ public interface IJsonTimingClient
     /// </summary>
     /// <param name="directory">The directory to load the simulation files from.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating that execution should be stopped.</param>
-    /// <returns>A Task indicating when all simulation data has been sent to the <see cref="ITimingClient"/>.</returns>
+    /// <returns>A Task indicating when all simulation data has been sent to the <see cref="ITimingService"/>.</returns>
     Task LoadSimulationDataAsync(string directory, CancellationToken cancellationToken = default);
 }

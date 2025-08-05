@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 using UndercutF1.Data;
@@ -8,15 +7,6 @@ namespace UndercutF1.Console;
 
 public sealed class DebugDataDisplay(IEnumerable<IProcessor> processors, State state) : IDisplay
 {
-    private static readonly JsonSerializerOptions _jsonSerializerOptions = new(
-        JsonSerializerDefaults.Web
-    )
-    {
-        AllowTrailingCommas = true,
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     public Screen Screen => Screen.DebugData;
 
     public Task<IRenderable> GetContentAsync()
@@ -39,7 +29,7 @@ public sealed class DebugDataDisplay(IEnumerable<IProcessor> processors, State s
 
         var rows = new Rows(
             new Text($"Name: {processorName}"),
-            new Text(JsonSerializer.Serialize(latestDataPoint, _jsonSerializerOptions))
+            new Text(JsonSerializer.Serialize(latestDataPoint, Constants.JsonSerializerOptions))
         );
 
         return Task.FromResult<IRenderable>(rows);
