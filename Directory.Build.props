@@ -12,7 +12,9 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NBGV_ThisAssemblyIncludesPackageVersion>true</NBGV_ThisAssemblyIncludesPackageVersion>
+    <NoWarn>$(NoWarn);CS1573;CS1591;</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

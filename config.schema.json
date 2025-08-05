@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "properties": {
+    "dataDirectory": {
+      "type": "string"
+    },
+    "logDirectory": {
+      "type": "string"
+    },
+    "apiEnabled": {
+      "type": "boolean"
+    },
+    "verbose": {
+      "type": "boolean"
+    },
+    "notify": {
+      "type": "boolean"
+    },
+    "preferFfmpegPlayback": {
+      "type": "boolean",
+      "description": "Prefer to use FFmpeg (\u003Cc\u003Effplay\u003C/c\u003E) for audio playback (e.g. Team Radio) instead of more native options\nsuch as \u003Cc\u003Empg123\u003C/c\u003E or \u003Cc\u003Eafplay\u003C/c\u003E. FFmpeg is always used on Windows.\nDefaults to \u003Csee langword=\u0022false\u0022 /\u003E ."
+    },
+    "forceGraphicsProtocol": {
+      "enum": [
+        "iTerm",
+        "Kitty",
+        "Sixel",
+        null
+      ],
+      "description": "If provided, forces the app to output images using the given protocol.\nOtherwise, heuristics and queries will be used to determine if graphics are supported, and which protocol to use."
+    },
+    "externalPlayerSync": {
+      "description": "Options to configure the external player synchronisation service",
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the player sync is enabled or not."
+        },
+        "serviceType": {
+          "description": "What the external service we\u0027re syncing against is.\nThis determines what API calls undercutf1 will be making, and how it will make them.",
+          "enum": [
+            "Kodi"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri",
+          "description": "The URL where the external players API can be found."
+        },
+        "webSocketConnectInterval": {
+          "type": "integer",
+          "description": "The amount of time, in milliseconds, to wait between attempts to connect to the external services\nWebSocket interface."
+        }
+      }
+    }
+  }
+}
