@@ -35,9 +35,9 @@ public static partial class CommandHandler
             var infoDisplay = app.Services.GetRequiredService<InfoDisplay>();
             var content = await infoDisplay.GetContentAsync();
 
-            if (content is IExpandable expandable)
+            if (content is Panel panel)
             {
-                expandable.Collapse();
+                panel.Collapse().NoBorder();
             }
 
             var output = AnsiConsole.Console.ToAnsi(content).Replace(Environment.NewLine, "\r\n");
