@@ -39,7 +39,6 @@ public static partial class CommandHandler
             .AddSingleton<INotifyHandler, NotifyHandler>()
             .AddSingleton<TerminalInfoProvider>()
             .AddSingleton<AudioPlayer>()
-            .AddSingleton<WebSocketSynchroniser>()
             .AddHostedService(sp => sp.GetRequiredService<ConsoleLoop>())
             .AddHostedService(sp => sp.GetRequiredService<WebSocketSynchroniser>());
 

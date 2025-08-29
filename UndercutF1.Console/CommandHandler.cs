@@ -2,6 +2,7 @@ using InMemLogger;
 using Serilog;
 using Serilog.Events;
 using TextCopy;
+using UndercutF1.Console.ExternalPlayerSync;
 using UndercutF1.Console.Graphics;
 using UndercutF1.Data;
 
@@ -104,6 +105,7 @@ public static partial class CommandHandler
             })
             .Configure<Options>(builder.Configuration)
             .AddLiveTiming(builder.Configuration)
+            .AddSingleton<WebSocketSynchroniser>()
             .InjectClipboard();
 
         builder.WebHost.UseServer(new NullServer());
