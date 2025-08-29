@@ -78,6 +78,8 @@ public class ConsoleLoop(
                     );
                 }
 
+                var shouldDraw = _previousDraw != output;
+
                 if (_previousDraw != output)
                 {
                     await Terminal.OutAsync(output, cancellationToken);
@@ -86,7 +88,7 @@ public class ConsoleLoop(
 
                 if (display is not null)
                 {
-                    await display.PostContentDrawAsync();
+                    await display.PostContentDrawAsync(shouldDraw);
                 }
             }
             catch (Exception ex)

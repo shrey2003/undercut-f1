@@ -61,6 +61,7 @@ public class TimingHistoryDisplay(
     };
 
     private string[] _chartPanelControlSequence = [];
+    private string[] _previousSequence = [];
 
     public Task<IRenderable> GetContentAsync()
     {
@@ -74,12 +75,19 @@ public class TimingHistoryDisplay(
     }
 
     /// <inheritdoc />
-    public async Task PostContentDrawAsync()
+    public async Task PostContentDrawAsync(bool shouldDraw)
     {
         await Terminal.OutAsync(ControlSequences.MoveCursorTo(0, LEFT_OFFSET));
-        foreach (var sequence in _chartPanelControlSequence)
+
+        // Only draw if we need to, or if the drawing has changed
+        var hasChanged = !_previousSequence.SequenceEqual(_chartPanelControlSequence);
+        if (shouldDraw || hasChanged)
         {
-            await Terminal.OutAsync(sequence);
+            foreach (var sequence in _chartPanelControlSequence)
+            {
+                await Terminal.OutAsync(sequence);
+                _previousSequence = _chartPanelControlSequence;
+            }
         }
     }
 

@@ -63,6 +63,7 @@ public class DriverTrackerDisplay : IDisplay
     private TransformFactors? _transform = null;
 
     private string[] _trackMapControlSequence = [];
+    private string[] _previousTrackMapControlSequence = [];
 
     public DriverTrackerDisplay(
         State state,
@@ -428,12 +429,19 @@ public class DriverTrackerDisplay : IDisplay
     }
 
     /// <inheritdoc />
-    public async Task PostContentDrawAsync()
+    public async Task PostContentDrawAsync(bool shouldDraw)
     {
         await Terminal.OutAsync(ControlSequences.MoveCursorTo(TOP_OFFSET, LEFT_OFFSET));
-        foreach (var sequence in _trackMapControlSequence)
+
+        var hasChanged = !_previousTrackMapControlSequence.SequenceEqual(_trackMapControlSequence);
+        // Only draw if we need to, or if the drawing has changed
+        if (shouldDraw || !hasChanged)
         {
-            await Terminal.OutAsync(sequence);
+            foreach (var sequence in _trackMapControlSequence)
+            {
+                await Terminal.OutAsync(sequence);
+                _previousTrackMapControlSequence = _trackMapControlSequence;
+            }
         }
     }
 
