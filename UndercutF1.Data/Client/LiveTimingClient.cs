@@ -40,7 +40,7 @@ public sealed class LiveTimingClient(
         "ChampionshipPrediction",
         "TeamRadio",
         "TyreStintSeries",
-        "PitStopSeries",
+        "PitLaneTimeCollection",
     ];
 
     public HubConnection? Connection { get; private set; }
@@ -94,7 +94,7 @@ public sealed class LiveTimingClient(
             _sessionKey
         );
 
-        var filePath = Path.Join(options.Value.DataDirectory, $"{_sessionKey}/subscribe.txt");
+        var filePath = Path.Join(options.Value.DataDirectory, $"{_sessionKey}/subscribe.json");
         if (!File.Exists(filePath))
         {
             var path = $"{options.Value.DataDirectory}/{_sessionKey}";
@@ -117,7 +117,7 @@ public sealed class LiveTimingClient(
             // Remove line endings and indents to optimise the size of the string when saved to file
             res = res.ReplaceLineEndings(string.Empty).Replace("    ", string.Empty);
             File.AppendAllText(
-                Path.Join(options.Value.DataDirectory, $"{_sessionKey}/live.txt"),
+                Path.Join(options.Value.DataDirectory, $"{_sessionKey}/live.jsonl"),
                 res + Environment.NewLine
             );
 

@@ -352,8 +352,8 @@ However, the shown keys aren't the only keys which can trigger the action, there
 
 All events received by the live timing client will be written to the configured `Data Directory`, see [see Configuration for details](#configuration). Files will be written to a subdirectory named using the current sessions name, e.g. `<data-directory>/2025_Jeddah_Race/`. In this directory, two files will be written:
 
-- `subscribe.txt` contains the data received at subscription time (i.e. when the live timing client connected to the stream)
-- `live.txt` contains an append-log of every message received in the stream
+- `subscribe.json` contains the data received at subscription time (i.e. when the live timing client connected to the stream)
+- `live.jsonl` contains an append-log of every message received in the stream
 
 Both of these files are required for future simulations/replays. The `IJsonTimingClient` supports loading these files and processing them in the same way live data would be. Data points will be replayed in real time, using an adjustable delay.
 

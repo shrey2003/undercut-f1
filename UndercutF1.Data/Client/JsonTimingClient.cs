@@ -21,9 +21,8 @@ public class JsonTimingClient(
     {
         try
         {
-            var subscriptionData = await File.ReadAllTextAsync(
-                    Path.Join(directory, "/subscribe.txt")
-                )
+            var subscriptionFilePath = GetSubscriptionFilePath(directory);
+            var subscriptionData = await File.ReadAllTextAsync(subscriptionFilePath)
                 .ConfigureAwait(false);
             var sessionInfo = JsonNode
                 .Parse(subscriptionData)
@@ -58,10 +57,16 @@ public class JsonTimingClient(
                 .Where(x =>
                     Directory
                         .GetFiles(x)
-                        .Any(x => x.EndsWith("live.txt", StringComparison.OrdinalIgnoreCase))
+                        .Any(x =>
+                            x.EndsWith("live.txt", StringComparison.OrdinalIgnoreCase)
+                            || x.EndsWith("live.jsonl", StringComparison.OrdinalIgnoreCase)
+                        )
                     && Directory
                         .GetFiles(x)
-                        .Any(x => x.EndsWith("subscribe.txt", StringComparison.OrdinalIgnoreCase))
+                        .Any(x =>
+                            x.EndsWith("subscribe.txt", StringComparison.OrdinalIgnoreCase)
+                            || x.EndsWith("subscribe.json", StringComparison.OrdinalIgnoreCase)
+                        )
                 )
                 .Select(ReadSessionInfoFromDirectoryAsync);
 
@@ -93,8 +98,9 @@ public class JsonTimingClient(
         try
         {
             // Handle the dump of data we receive at subscription time
+            var subscriptionFilePath = GetSubscriptionFilePath(directory);
             var subscriptionData = await File.ReadAllTextAsync(
-                    Path.Join(directory, "/subscribe.txt"),
+                    subscriptionFilePath,
                     cancellationToken
                 )
                 .ConfigureAwait(false);
@@ -104,7 +110,8 @@ public class JsonTimingClient(
             dateTimeProvider.Delay = CalculateDelay(subscriptionData);
 
             // Handle the real-time data
-            var lines = File.ReadLinesAsync(Path.Join(directory, "/live.txt"), cancellationToken);
+            var liveFilePath = GetLiveFilePath(directory);
+            var lines = File.ReadLinesAsync(liveFilePath, cancellationToken);
 
             await foreach (var line in lines)
             {
@@ -175,4 +182,15 @@ public class JsonTimingClient(
             return (parts.Type, parts.Json.ToString(), parts.DateTime);
         }
     }
+
+    // We used to save data as .txt files, but we then switched to storing them as .json and .jsonl
+    private static string GetSubscriptionFilePath(string directory) =>
+        File.Exists(Path.Join(directory, "/subscribe.json"))
+            ? Path.Join(directory, "/subscribe.json")
+            : Path.Join(directory, "/subscribe.txt");
+
+    private static string GetLiveFilePath(string directory) =>
+        File.Exists(Path.Join(directory, "/live.jsonl"))
+            ? Path.Join(directory, "/live.jsonl")
+            : Path.Join(directory, "/live.txt");
 }

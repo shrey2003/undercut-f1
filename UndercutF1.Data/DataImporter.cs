@@ -107,8 +107,8 @@ public sealed class DataImporter(
             $"{year}_{location}_{sessionName}".Replace(' ', '_')
         );
 
-        var liveFilePath = Path.Join(directory, "live.txt");
-        var subscribeFilePath = Path.Join(directory, "subscribe.txt");
+        var liveFilePath = Path.Join(directory, "live.jsonl");
+        var subscribeFilePath = Path.Join(directory, "subscribe.json");
 
         if (File.Exists(liveFilePath))
         {

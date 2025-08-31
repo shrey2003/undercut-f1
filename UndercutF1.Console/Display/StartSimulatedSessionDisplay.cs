@@ -132,7 +132,7 @@ public class StartSimulatedSessionDisplay(
         var title = $"""
             Select the data directory to run the simulation from. 
 
-            If you cannot see your directory here, ensure that it contains both a file named subscribe.txt and live.txt.
+            If you cannot see your directory here, ensure that it contains both a file named subscribe.json and live.jsonl.
             The directory name must be of the form /<location>_<session-type>/ e.g. /Silverstone_Practice_1/
 
             To change the data directory, set the UNDERCUTF1_DATADIRECTORY environment variable or pass in the --data-directory argument.
