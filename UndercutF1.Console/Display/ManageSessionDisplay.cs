@@ -44,7 +44,9 @@ public class ManageSessionDisplay(
             ).RightJustified(),
             new Text($"Type: {sessionInfo.Latest.Name ?? ""}").RightJustified(),
             new Text($"Start (UTC): {sessionInfo.Latest.GetStartDateTimeUtc():s}").RightJustified(),
-            new Text($"Key: {sessionInfo.Latest.Key.ToString() ?? ""}").RightJustified()
+            new Text(
+                $"Key: {sessionInfo.Latest.Key}/{sessionInfo.Latest.Meeting?.Circuit?.Key}"
+            ).RightJustified()
         );
 
         session.Collapse();

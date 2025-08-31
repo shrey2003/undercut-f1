@@ -1,16 +1,15 @@
-﻿using System.Globalization;
-using System.Net;
-using System.Text;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.AspNet.SignalR.Client;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 
 namespace UndercutF1.Data;
 
 public sealed class LiveTimingClient(
     ITimingService timingService,
+    ILoggerProvider loggerProvider,
     IOptions<LiveTimingOptions> options,
     ILogger<LiveTimingClient> logger
 ) : ILiveTimingClient, IDisposable
@@ -18,15 +17,15 @@ public sealed class LiveTimingClient(
     private bool _disposedValue;
     private string _sessionKey = "UnknownSession";
 
+    private readonly JsonSerializerOptions _prettyJsonOptions = new(JsonSerializerOptions.Default)
+    {
+        WriteIndented = true,
+    };
+
     private static readonly string[] _topics =
     [
         "Heartbeat",
-        "CarData.z",
-        "Position.z",
-        "CarData",
-        "Position",
         "ExtrapolatedClock",
-        "TopThree",
         "TimingStats",
         "TimingAppData",
         "WeatherData",
@@ -37,9 +36,12 @@ public sealed class LiveTimingClient(
         "SessionData",
         "LapCount",
         "TimingData",
-        "ChampionshipPrediction",
         "TeamRadio",
         "TyreStintSeries",
+        // Only available with subscription?
+        "CarData.z",
+        "Position.z",
+        "ChampionshipPrediction",
         "PitLaneTimeCollection",
     ];
 
@@ -52,37 +54,29 @@ public sealed class LiveTimingClient(
         if (Connection is not null)
             logger.LogWarning("Live timing connection already exists, restarting it");
 
-        DisposeConnection();
+        await DisposeConnectionAsync();
 
-        Connection = new HubConnection("http://livetiming.formula1.com/signalr")
-        {
-            CookieContainer = new CookieContainer(),
-            TraceWriter = new LogWriter(logger),
-        };
+        Connection = new HubConnectionBuilder()
+            .WithUrl("http://livetiming.formula1.com/signalrcore")
+            .WithAutomaticReconnect()
+            .ConfigureLogging(configure => configure.AddProvider(loggerProvider))
+            .AddJsonProtocol()
+            .Build();
 
-        Connection.EnsureReconnecting();
+        Connection.On<string, JsonNode, DateTimeOffset>("feed", HandleData);
+        Connection.Closed += HandleClosedAsync;
 
-        Connection.Received += HandleData;
-        Connection.Error += (ex) =>
-            logger.LogError(ex, "Error in live timing client: {}", ex.ToString());
-        Connection.Reconnecting += () => logger.LogWarning("Live timing client is reconnecting");
-        Connection.Reconnected += () => logger.LogWarning("Live timing client reconnected");
-        Connection.Closed += HandleClosed;
-
-        var hub = Connection.CreateHubProxy("Streaming");
-
-        await Connection.Start();
+        await Connection.StartAsync();
 
         logger.LogInformation("Subscribing");
-        var res = await hub.Invoke<JObject>("Subscribe", [_topics]);
-        HandleSubscriptionResponse(res.ToString());
+        var res = await Connection.InvokeAsync<JsonObject>("Subscribe", _topics);
+        HandleSubscriptionResponse(res);
 
         logger.LogInformation("Started Live Timing client");
     }
 
-    private void HandleSubscriptionResponse(string res)
+    private void HandleSubscriptionResponse(JsonObject obj)
     {
-        var obj = JsonNode.Parse(res)?.AsObject();
         var sessionInfo = obj?["SessionInfo"];
         var location = sessionInfo?["Meeting"]?["Location"] ?? "UnknownLocation";
         var sessionName = sessionInfo?["Name"] ?? "UnknownName";
@@ -94,61 +88,53 @@ public sealed class LiveTimingClient(
             _sessionKey
         );
 
+        var res = obj!.ToJsonString(_prettyJsonOptions);
+
         var filePath = Path.Join(options.Value.DataDirectory, $"{_sessionKey}/subscribe.json");
         if (!File.Exists(filePath))
         {
             var path = $"{options.Value.DataDirectory}/{_sessionKey}";
             Directory.CreateDirectory(path);
             logger.LogInformation("Writing subscription response to {Path}", path);
-            File.WriteAllText(filePath, res);
+            File.WriteAllText(filePath, obj!.ToJsonString(_prettyJsonOptions));
         }
         else
         {
-            logger.LogWarning("Data Subscription file already exists, will not create a new one");
+            logger.LogWarning(
+                "Data Subscription file at {Path} already exists, will not create a new one",
+                filePath
+            );
         }
 
         timingService.ProcessSubscriptionData(res);
     }
 
-    private void HandleData(string res)
+    private void HandleData(string type, JsonNode json, DateTimeOffset dateTime)
     {
+        var raw = new RawTimingDataPoint(type, json, dateTime);
         try
         {
-            // Remove line endings and indents to optimise the size of the string when saved to file
-            res = res.ReplaceLineEndings(string.Empty).Replace("    ", string.Empty);
             File.AppendAllText(
                 Path.Join(options.Value.DataDirectory, $"{_sessionKey}/live.jsonl"),
-                res + Environment.NewLine
+                JsonSerializer.Serialize(raw) + Environment.NewLine
             );
 
-            var json = JsonNode.Parse(res);
-            var data = json?["A"];
-
-            if (data is null)
-                return;
-            if (data.AsArray().Count != 3)
-                return;
-
-            var eventData = data[1] is JsonValue ? data[1]!.ToString() : data[1]!.ToJsonString();
-            timingService.EnqueueAsync(
-                data[0]!.ToString(),
-                eventData,
-                DateTimeOffset.Parse(data[2]!.ToString())
-            );
+            // TODO: converting `json` to a string shouldn't be needed here, we need to change the signature in TimingService
+            timingService.EnqueueAsync(type, json.ToString(), dateTime);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to handle live timing data: {Res}", res);
+            logger.LogError(ex, "Failed to handle live timing data: {Res}", raw);
         }
     }
 
-    private void HandleClosed()
+    private async Task HandleClosedAsync(Exception? cause)
     {
-        logger.LogWarning("Live timing client connection closed, attempting to reconnect");
+        logger.LogWarning(cause, "Live timing client connection closed, attempting to reconnect");
         try
         {
-            DisposeConnection();
-            _ = StartAsync();
+            await DisposeConnectionAsync();
+            await StartAsync();
         }
         catch (Exception ex)
         {
@@ -156,9 +142,12 @@ public sealed class LiveTimingClient(
         }
     }
 
-    private void DisposeConnection()
+    private async Task DisposeConnectionAsync()
     {
-        Connection?.Dispose();
+        if (Connection is not null)
+        {
+            await Connection.DisposeAsync();
+        }
         Connection = null;
     }
 
@@ -166,45 +155,9 @@ public sealed class LiveTimingClient(
     {
         if (!_disposedValue)
         {
-            DisposeConnection();
+            _ = DisposeConnectionAsync();
             _disposedValue = true;
         }
         GC.SuppressFinalize(this);
-    }
-
-    private sealed class LogWriter : TextWriter
-    {
-        private readonly StringBuilder _buffer;
-        private readonly ILogger _logger;
-
-        public override Encoding Encoding => Encoding.UTF8;
-
-        public LogWriter(ILogger logger)
-            : base(CultureInfo.InvariantCulture)
-        {
-            _logger = logger;
-            _buffer = new StringBuilder();
-        }
-
-        public override void Write(char value)
-        {
-            lock (_buffer)
-            {
-                if (value == '\n')
-                {
-                    Flush();
-                }
-                else
-                {
-                    _buffer.Append(value);
-                }
-            }
-        }
-
-        public override void Flush()
-        {
-            _logger.LogDebug("SignalR Trace: {Message}", _buffer.ToString());
-            _buffer.Clear();
-        }
     }
 }

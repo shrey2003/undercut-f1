@@ -166,7 +166,7 @@ public class JsonTimingClient(
     {
         var json = JsonNode.Parse(line);
         // When we used the old ASP.NET SignalR, we received messages in an older format
-        // Newer ASP.NET SignalR session recording saved RawTimingDataPoints instead
+        // Newer ASP.NETCore SignalR session recording (and data imports) saved RawTimingDataPoints instead
         if (json?["A"] is not null)
         {
             var parts = json["A"]!.AsArray();
