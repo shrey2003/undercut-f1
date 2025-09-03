@@ -63,11 +63,6 @@ public sealed class LiveTimingClient(
                 {
                     configure.AccessTokenProvider = () =>
                         Task.FromResult(formula1Account.AccessToken.Value);
-                    configure.Headers = new Dictionary<string, string>
-                    {
-                        ["AWSALBCORS"] =
-                            "H35j6NSehCWFGzuG7XAU3YNLzHosapCPwU73OnOhLiGcg+4RKpcxtz0BnmIOa1YhI/WkjA8WbmqloqygioOrH8GYGP0Fy1bXDuzSH7Ff+QI0RGug72T7TLJRgL58",
-                    };
                 }
             )
             .WithAutomaticReconnect()
