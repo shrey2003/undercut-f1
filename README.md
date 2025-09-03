@@ -180,6 +180,9 @@ There are however some utilities that may need to be installed for some function
 - Terminal graphics rely on [SkiaSharp](https://github.com/mono/SkiaSharp). I've statically linked all the skia libs, so you shouldn't need to download skia. However, skia does rely on `libfontconfig` which may not be installed on your system by default.
   - On Linux apt-based systems, you can install with `apt install libfontconfig`
   - On Mac with brew, you can install with `brew install fontconfig`
+- Guided F1 TV sign in (see [F1 TV Account Login](#f1-tv-account-login)) uses the <https://github.com/webview/webview> library to launch a WebView and guide you through sign in. This isn't required functionality, F1 TV sign-in can be done manually or completely ignored.
+  - On Windows/Mac, this should work with the natively installed WebView2 and WebKit respectively.
+  - On Linux, this uses WebKitGTK which may or may not already be installed. See [webview's documentation for more](https://github.com/webview/webview#linux-and-bsd).
 
 #### Install and run as a dotnet tool
 
