@@ -115,11 +115,6 @@ public static partial class CommandHandler
         );
         AnsiConsole.WriteLine();
 
-        if (!AnsiConsole.Confirm("Proceed to logout?", defaultValue: true))
-        {
-            return;
-        }
-
         var configFileJson = await ReadConfigFileAsync();
         configFileJson.Remove(nameof(Options.Formula1AccessToken));
 
@@ -128,7 +123,6 @@ public static partial class CommandHandler
             configFileJson.ToJsonString(Constants.JsonSerializerOptions)
         );
 
-        AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine(
             $"""
             [green]Logout successful.[/]

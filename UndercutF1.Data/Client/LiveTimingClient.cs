@@ -40,7 +40,7 @@ public sealed class LiveTimingClient(
         "TeamRadio",
         // Only available with subscription?
         "CarData.z",
-        "Position",
+        "Position.z",
         "ChampionshipPrediction",
         "PitLaneTimeCollection",
     ];
@@ -58,7 +58,7 @@ public sealed class LiveTimingClient(
 
         Connection = new HubConnectionBuilder()
             .WithUrl(
-                "http://livetiming.formula1.com/signalrcore",
+                "wss://livetiming.formula1.com/signalrcore",
                 configure =>
                 {
                     configure.AccessTokenProvider = () =>
@@ -72,7 +72,7 @@ public sealed class LiveTimingClient(
             )
             .WithAutomaticReconnect()
             .ConfigureLogging(configure =>
-                configure.AddProvider(loggerProvider).SetMinimumLevel(LogLevel.Trace)
+                configure.AddProvider(loggerProvider).SetMinimumLevel(LogLevel.Information)
             )
             .AddJsonProtocol()
             .Build();

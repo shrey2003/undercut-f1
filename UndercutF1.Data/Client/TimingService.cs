@@ -109,7 +109,7 @@ public class TimingService(
             ProcessData("WeatherData", obj["WeatherData"]?.ToString(), DateTimeOffset.UtcNow);
             ProcessData("SessionInfo", obj["SessionInfo"]?.ToString(), DateTimeOffset.UtcNow);
             ProcessData("CarData.z", obj["CarData.z"]?.ToString(), DateTimeOffset.UtcNow);
-            ProcessData("PositionData.z", obj["PositionData.z"]?.ToString(), DateTimeOffset.UtcNow);
+            ProcessData("Position.z", obj["Position.z"]?.ToString(), DateTimeOffset.UtcNow);
             ProcessData("TeamRadio", obj["TeamRadio"]?.ToString(), DateTimeOffset.UtcNow);
             ProcessData(
                 "ChampionshipPrediction",
