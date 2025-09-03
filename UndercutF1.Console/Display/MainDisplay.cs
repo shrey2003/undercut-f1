@@ -39,8 +39,9 @@ public class MainDisplay(
                 [italic]> undercutf1 login[/]
                 """,
             _ => """
-                Some features (like Driver Tracker) require an F1 TV subscription. Run the following to login:
+                [yellow]Some features (like Driver Tracker) require an F1 TV subscription.[/] Run the following to login:
                 [italic]> undercutf1 login[/]
+                See https://github.com/JustAman62/undercut-f1#f1-tv-account-login for details
                 """,
         };
 

@@ -27,9 +27,9 @@ Feature Highlights:
 - [Pause the session clock](#external-session-clock-sync) when you pause external video players (such as Kodi), so that your timing screen remains in sync with your feed.
 
 > [!WARNING]
-> Since the 2025 Dutch GP, the F1 Live Timing feed no longer publishes some of the data we need to provide all existing functionality.
+> Since the 2025 Dutch GP, the F1 Live Timing feed no longer freely publishes some of the data we need to provide all existing functionality.
 >
-> The following functionality is no longer available during live sessions:
+> The following functionality is now only available to those who have an active F1 TV subscription:
 >
 > - Driver Tracker (live position of each car is unavailable)
 > - DRS Indicator in Timing Screens
@@ -38,9 +38,7 @@ Feature Highlights:
 >
 > Importing a session after it finishes still fetches all the data, so all functionality is available if you use undercut-f1 after a race finishes.
 >
-> Efforts to resolve this are being tracked in [issue #74](https://github.com/JustAman62/undercut-f1/issues/74).
->
-> All other functionality of undercut-f1 remains unaffected.
+> Linking your F1 TV account with undercut-f1 is as simple as running `undercutf1 login` before starting your session, and following the instructions displayed. See [F1 TV Account Login](#f1-tv-account-login) for details.
 
 <!-- omit in toc -->
 ## Table of Contents
@@ -72,6 +70,7 @@ Feature Highlights:
     - [Using the Cursor](#using-the-cursor)
 - [Configuration](#configuration)
   - [Default Directories](#default-directories)
+  - [F1 TV Account Login](#f1-tv-account-login)
 - [Logging](#logging)
 - [Alternate Key Binds](#alternate-key-binds)
 - [Data Recording and Replay](#data-recording-and-replay)
@@ -325,6 +324,7 @@ To view what configuration is currently being used, open the <kbd>I</kbd> `Info`
 | `notify`                                      | `--notify`                  | `UNDERCUTF1_NOTIFY`                                       | Whether the app should sent audible BELs to your terminal when new race control messages are received. Default: `true`. Values: `true` or `false`.                                        |
 | `preferFfmpegPlayback`                        | `--prefer-ffmpeg`           | `UNDERCUTF1_PREFERFFMPEGPLAYBACK`                         | Prefer the usage of `ffplay` for playing Team Radio on Mac/Linux, instead of afplay/mpg123 respectively. `ffplay` is always used on Windows. Default: `false`. Values: `true` or `false`. |
 | `forceGraphicsProtocol`                       | `--force-graphics-protocol` | `UNDERCUTF1_FORCEGRAPHICSPROTOCOL`                        | Forces the usage of a particular graphics protocol instead of using heuristics to find a supported one. Values: `Kitty`, `Sixel`, or `iTerm`.                                             |
+| `formula1AccessToken`                         | N/A                         | `UNDERCUTF1_FORMULA1ACCESSTOKEN`                          | The access token to use when connecting to the F1 Live Timing feed. Only required to see additional data feeds.                                                                           |
 | `externalPlayerSync.enabled`                  | N/A                         | `UNDERCUTF1_EXTERNALPLAYERSYNC__ENABLED`                  | Whether synchronisation of the session clock is enabled. Default: `false`. Values: `true` or `false`.                                                                                     |
 | `externalPlayerSync.url`                      | N/A                         | `UNDERCUTF1_EXTERNALPLAYERSYNC__URL`                      | The URL to use when connecting to the external services websocket. For Kodi, this will be something like `ws://localhost:9090/jsonrpc`.                                                   |
 | `externalPlayerSync.serviceType`              | N/A                         | `UNDERCUTF1_EXTERNALPLAYERSYNC__SERVICETYPE`              | What type of service is behind the provided URL to synchronise with. Values: `Kodi`.                                                                                                      |
@@ -342,6 +342,41 @@ UndercutF1 tries to adhere the Windows and XDG standards as much as possible. By
 
 Data and Logs paths can be configured as [described above](#configuration).
 The config file location cannot be modified, and will always be read from the above location.
+
+### F1 TV Account Login
+
+Since the 2025 Dutch GP, the F1 Live Timing feed no longer freely publishes some of the data we need to provide all functionality in undercut-f1.
+
+The following functionality is now only available to those who have an active F1 TV subscription:
+
+- Driver Tracker (live position of each car is unavailable)
+- DRS Indicator in Timing Screens
+- Team/Drivers championship tables
+- Pit Stop times (in box and in pitlane)
+
+Importing a session after it finishes still fetches all the data, so all functionality is available if you use undercut-f1 after a race finishes.
+
+Linking your F1 TV account with undercut-f1 is as simple as running `undercutf1 login` before starting your session, and following the instructions displayed. undercutf1 will open a WebView on to the F1 website, allowing you to sign in. It will then read the generated access token cookie for you from the WebView, and save it in the undercutf1 config file. This token is usually valid for a week, so you will likely have to perform this action often.
+
+The current validity of your access token can be shown by running `undercutf1 info` (or in the Info screen of the TUI). A note will also be displayed on the entrypoint display of the TUI, reminding you to re-login if the current token has expired.
+
+If the `undercutf1 login` command does not work for you, there is a manual process:
+
+1. In a web browser, navigate to [the Formula 1 Account Login](https://account.formula1.com/#/en/login)
+2. Log in with your account credentials
+3. Open the browsers web inspector/inspect element/dev console
+4. Navigate to the cookie storage section (usually in `Application` or `Storage`)
+5. Copy the value of the `login-session` cookie stored under the `static.formula1.com` or `formula1.com` domain
+6. Paste this string (without modification) in to the undercutf1 config file with the key `"formula1AccessToken"`
+
+Example:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/JustAman62/undercut-f1/refs/heads/master/config.schema.json",
+  "formula1AccessToken": "%7B%22data%22%3A%7B%22subscriptionToken%22%3A%22eyJ....."
+}
+```
 
 ## Logging
 
