@@ -10,21 +10,21 @@ public sealed class Formula1Account(
 )
 {
     public string? AccessToken =>
-        IsAuthenticated(options.Value.Formula1AccessToken, out _) == AuthenticationResult.Success
+        IsAuthenticated(out _) == AuthenticationResult.Success
             ? options.Value.Formula1AccessToken
             : null;
 
     public TokenPayload? Payload =>
-        IsAuthenticated(options.Value.Formula1AccessToken, out var payload)
-        == AuthenticationResult.Success
-            ? payload
-            : null;
+        IsAuthenticated(out var payload) == AuthenticationResult.Success ? payload : null;
+
+    public AuthenticationResult IsAuthenticated(out TokenPayload? payload) =>
+        IsAuthenticated(options.Value.Formula1AccessToken, out payload);
 
     public AuthenticationResult IsAuthenticated(string? token, out TokenPayload? payload)
     {
         payload = null;
         if (string.IsNullOrWhiteSpace(token))
-            return AuthenticationResult.InvalidToken;
+            return AuthenticationResult.NoToken;
 
         try
         {
@@ -65,11 +65,11 @@ public sealed class Formula1Account(
 
         // For some reason, the base64 encoded string sometimes doesn't have enough padding chars at the end
         // Base64 strings should be a multiple of 4
-        var missingPaddingChars = 4 - (tokenPart.Length % 4);
+        var missingPaddingChars = tokenPart.Length % 4;
         if (missingPaddingChars > 0)
         {
             logger.LogDebug("Adding {Count} extra padding chars", missingPaddingChars);
-            tokenPart += new string('=', missingPaddingChars);
+            tokenPart += new string('=', 4 - missingPaddingChars);
         }
 
         var tokenPayload = JsonSerializer.Deserialize<TokenPayload>(
@@ -95,6 +95,7 @@ public sealed class Formula1Account(
     public enum AuthenticationResult
     {
         Success,
+        NoToken,
         InvalidToken,
         InvalidSubscriptionStatus,
         ExpiredToken,
