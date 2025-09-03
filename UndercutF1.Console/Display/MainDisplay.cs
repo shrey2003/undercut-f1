@@ -27,7 +27,8 @@ public class MainDisplay(
             """
         ).Centered();
 
-        var authStatus = accountService.IsAuthenticated(out var payload);
+        var authStatus = accountService.IsAuthenticated.Value;
+        var payload = accountService.Payload.Value;
         var accountDetail = authStatus switch
         {
             Formula1Account.AuthenticationResult.Success => $"""

@@ -18,7 +18,8 @@ public sealed class InfoDisplay(
 
     public Task<IRenderable> GetContentAsync()
     {
-        var authStatus = accountService.IsAuthenticated(out var payload);
+        var authStatus = accountService.IsAuthenticated.Value;
+        var payload = accountService.Payload.Value;
         var content = $"""
             [bold]Configuration[/]
             [bold]Data Directory:[/]        {options.Value.DataDirectory}

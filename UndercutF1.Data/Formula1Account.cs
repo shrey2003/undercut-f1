@@ -1,26 +1,37 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace UndercutF1.Data;
 
-public sealed class Formula1Account(
-    IOptions<LiveTimingOptions> options,
-    ILogger<Formula1Account> logger
-)
+public sealed class Formula1Account
 {
-    public string? AccessToken =>
-        IsAuthenticated(out _) == AuthenticationResult.Success
-            ? options.Value.Formula1AccessToken
-            : null;
+    private readonly IOptions<LiveTimingOptions> _options;
+    private readonly ILogger<Formula1Account> _logger;
 
-    public TokenPayload? Payload =>
-        IsAuthenticated(out var payload) == AuthenticationResult.Success ? payload : null;
+    public Formula1Account(IOptions<LiveTimingOptions> options, ILogger<Formula1Account> logger)
+    {
+        _options = options;
+        _logger = logger;
 
-    public AuthenticationResult IsAuthenticated(out TokenPayload? payload) =>
-        IsAuthenticated(options.Value.Formula1AccessToken, out payload);
+        Payload = new(CheckToken(out var payload) == AuthenticationResult.Success ? payload : null);
+        IsAuthenticated = new(() => CheckToken(out _));
+        AccessToken = new(
+            IsAuthenticated.Value == AuthenticationResult.Success
+                ? SubscriptionTokenFromAccessToken(options.Value.Formula1AccessToken!)
+                : null
+        );
+    }
 
-    public AuthenticationResult IsAuthenticated(string? token, out TokenPayload? payload)
+    public Lazy<string?> AccessToken { get; }
+    public Lazy<TokenPayload?> Payload { get; }
+    public Lazy<AuthenticationResult> IsAuthenticated { get; }
+
+    private AuthenticationResult CheckToken(out TokenPayload? payload) =>
+        CheckToken(_options.Value.Formula1AccessToken, out payload);
+
+    public AuthenticationResult CheckToken(string? token, out TokenPayload? payload)
     {
         payload = null;
         if (string.IsNullOrWhiteSpace(token))
@@ -34,7 +45,7 @@ public sealed class Formula1Account(
 
             if (payload.SubscriptionStatus != "active")
             {
-                logger.LogError(
+                _logger.LogError(
                     "Formula 1 Access Token does not have an active subscription status (Value: {Status}). If you've recently subscribed, you may want to try logging in again. This token cannot be used for authenticated with the live timing feed. An F1 TV subscription is required for the additional live timing feeds, but no login is required for normal functionality.",
                     payload.SubscriptionStatus
                 );
@@ -43,7 +54,7 @@ public sealed class Formula1Account(
 
             if (payload.Expiry < DateTimeOffset.UtcNow)
             {
-                logger.LogError(
+                _logger.LogError(
                     "Formula 1 Access Token expired on {Date}, please login again.",
                     payload.Expiry
                 );
@@ -54,21 +65,24 @@ public sealed class Formula1Account(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to read data in access token");
+            _logger.LogError(ex, "Failed to read data in access token");
             return AuthenticationResult.InvalidToken;
         }
     }
 
     private TokenPayload? GetTokenPayloadFromToken(string token)
     {
-        var tokenPart = token.Split('.')[1];
+        var subscriptionToken = SubscriptionTokenFromAccessToken(token)!;
+
+        // The token is split in to three parts, a header, body, and sig. We only want to read the body.
+        var tokenPart = subscriptionToken.Split('.')[1];
 
         // For some reason, the base64 encoded string sometimes doesn't have enough padding chars at the end
         // Base64 strings should be a multiple of 4
         var missingPaddingChars = tokenPart.Length % 4;
         if (missingPaddingChars > 0)
         {
-            logger.LogDebug("Adding {Count} extra padding chars", missingPaddingChars);
+            _logger.LogDebug("Adding {Count} extra padding chars", missingPaddingChars);
             tokenPart += new string('=', 4 - missingPaddingChars);
         }
 
@@ -76,8 +90,14 @@ public sealed class Formula1Account(
             Convert.FromBase64String(tokenPart),
             JsonSerializerOptions.Web
         );
-        logger.LogDebug("F1 TV Token Details: {Token}", tokenPayload);
+        _logger.LogDebug("F1 TV Token Details: {Token}", tokenPayload);
         return tokenPayload;
+    }
+
+    private string? SubscriptionTokenFromAccessToken(string token)
+    {
+        var jsonString = Uri.UnescapeDataString(token);
+        return JsonNode.Parse(jsonString)?["data"]?["subscriptionToken"]?.GetValue<string>();
     }
 
     public sealed record TokenPayload(

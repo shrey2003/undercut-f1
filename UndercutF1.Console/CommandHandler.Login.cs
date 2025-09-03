@@ -18,7 +18,7 @@ public static partial class CommandHandler
         var app = builder.Build();
 
         var accountService = app.Services.GetRequiredService<Formula1Account>();
-        var existingPayload = accountService.Payload;
+        var existingPayload = accountService.Payload.Value;
 
         // Allow a relogin on the day of expiry but not before
         if (existingPayload is not null && existingPayload.Expiry.Date != DateTime.Today)
@@ -67,7 +67,7 @@ public static partial class CommandHandler
         if (token is null)
             return;
 
-        var authResult = accountService.IsAuthenticated(token, out var payload);
+        var authResult = accountService.CheckToken(token, out var payload);
 
         if (authResult != Formula1Account.AuthenticationResult.Success)
         {
