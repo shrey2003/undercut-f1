@@ -42,7 +42,10 @@ public sealed class LiveTimingClient(
         "CarData.z",
         "Position.z",
         "ChampionshipPrediction",
+        // Not sure if these work now?
         "PitLaneTimeCollection",
+        "PitStopSeries",
+        "PitStop",
     ];
 
     public HubConnection? Connection { get; private set; }
