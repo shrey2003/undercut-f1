@@ -149,7 +149,7 @@ rootCommand.Subcommands.Add(imageCommand);
 var loginCommand = new Command(
     "login",
     """
-    Login to your Formula 1 account to unlock all feature of undercut-f1.
+    Login to your Formula 1 account to unlock all data feeds (like the driver tracker).
     """
 )
 {

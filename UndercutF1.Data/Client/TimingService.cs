@@ -130,6 +130,11 @@ public class TimingService(
                 DateTimeOffset.UtcNow
             );
             ProcessData("PitStopSeries", obj["PitStopSeries"]?.ToString(), DateTimeOffset.UtcNow);
+            ProcessData(
+                "PitLaneTimeCollection",
+                obj["PitLaneTimeCollection"]?.ToString(),
+                DateTimeOffset.UtcNow
+            );
         }
         catch (Exception ex)
         {
@@ -248,6 +253,9 @@ public class TimingService(
                     );
                 }
                 SendToProcessor<PitStopSeriesDataPoint>(json);
+                break;
+            case LiveTimingDataType.PitLaneTimeCollection:
+                SendToProcessor<PitLaneTimeCollectionDataPoint>(json);
                 break;
         }
     }

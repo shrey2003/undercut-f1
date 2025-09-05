@@ -1,5 +1,3 @@
-using Spectre.Console;
-
 namespace UndercutF1.Console;
 
 public record State

@@ -7,7 +7,7 @@ namespace UndercutF1.Console;
 public class TyreStintDisplay(
     State state,
     CommonDisplayComponents common,
-    PitStopSeriesProcessor pitStopSeries,
+    PitLaneTimeCollectionProcessor pitLaneTimeCollection,
     DriverListProcessor driverList,
     TimingAppDataProcessor timingAppData,
     LapCountProcessor lapCount
@@ -62,11 +62,11 @@ public class TyreStintDisplay(
             foreach (var (stintNumber, stint) in line.Stints.OrderBy(x => x.Key))
             {
                 var markup = DisplayUtils.GetStyleForTyreCompound(stint.Compound).ToMarkup();
-                var lapsOnThisTyre = (stint.TotalLaps - stint.StartLaps).GetValueOrDefault();
+                var lapsOnThisTyre = stint.GetStintDuration();
 
                 var padLength = Math.Max(1, lapsOnThisTyre - 1);
                 var text = $"{lapsOnThisTyre}".ToFixedWidth(padLength);
-                if (text.Length == 1)
+                if (lapsOnThisTyre <= 1)
                 {
                     text = string.Empty;
                 }
@@ -81,7 +81,7 @@ public class TyreStintDisplay(
                 // Add a white cell for the final lap
                 var emptyCellsToAdd = Math.Max(0, totalLapCount - lineTotalPadLength);
                 var emptyCells = string.Empty.ToFixedWidth(emptyCellsToAdd);
-                rowMarkup = rowMarkup + emptyCells + "[white on white] [/]";
+                rowMarkup = rowMarkup + emptyCells + "[white]▞▞[/]";
             }
 
             rows.Add(new Markup(rowMarkup));
@@ -103,10 +103,10 @@ public class TyreStintDisplay(
         var columns = new List<Rows>();
         foreach (var (stintNumber, stint) in line.Stints)
         {
-            var pitStop = pitStopSeries
-                .Latest.PitTimes.GetValueOrDefault(selectedDriverNumber)
-                ?.GetValueOrDefault((int.Parse(stintNumber) - 1).ToString())
-                ?.PitStop;
+            var pitStop = pitLaneTimeCollection
+                .Latest.PitTimesList.GetValueOrDefault(selectedDriverNumber)
+                ?.ElementAtOrDefault(int.Parse(stintNumber) - 1);
+
             var compoundMarkup = DisplayUtils.GetStyleForTyreCompound(stint.Compound).ToMarkup();
             // Use a consistent tyre compound header to centre it nicely
             var header = stint.Compound switch
@@ -118,14 +118,9 @@ public class TyreStintDisplay(
                 "WET" => " WET ",
                 _ => " UNK ",
             };
-            if (pitStop?.Lap is not null)
-            {
-                header += $"LAP {pitStop?.Lap ?? "?"} ".PadLeft(9);
-            }
-            else
-            {
-                header = header.PadRight(14);
-            }
+
+            header += $"LAP {line.Stints.GetPitLapForStint(stintNumber)} ".PadLeft(9);
+
             var rows = new List<Markup>
             {
                 new($"[{compoundMarkup}]{header}[/]"),
@@ -133,9 +128,8 @@ public class TyreStintDisplay(
                     $"Start Age  {(stint.New.GetValueOrDefault() ? "[green]NEW[/]" : $" {stint.StartLaps:D2}")}"
                 ),
                 new($"Total Laps  {stint.TotalLaps:D2}"),
-                pitStop is null ? new(" ") : new($"Stop Time  {pitStop?.PitStopTime}"),
-                pitStop is null ? new(" ") : new($"Lane    {pitStop?.PitLaneTime}"),
                 new($"Best  {stint.LapTime}"),
+                pitStop is null ? new(" ") : new($"Lane {pitStop?.Duration?.PadLeft(9)}"),
             };
             columns.Add(new Rows(rows).Collapse());
         }

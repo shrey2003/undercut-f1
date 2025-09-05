@@ -31,7 +31,9 @@ public sealed class DataImporter(
         "TimingData",
         "ChampionshipPrediction",
         "TeamRadio",
+        "PitLaneTimeCollection",
         "PitStopSeries",
+        "PitStop",
     ];
 
     private static readonly string[] _nonRaceTopics =
@@ -50,7 +52,9 @@ public sealed class DataImporter(
         "SessionData",
         "TimingData",
         "TeamRadio",
+        "PitLaneTimeCollection",
         "PitStopSeries",
+        "PitStop",
     ];
 
     /// <inheritdoc />

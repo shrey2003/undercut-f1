@@ -8,10 +8,6 @@ public static class TimingDataPointExtensions
         this TimingDataPoint data
     ) => data.Lines.OrderBy(x => x.Value.Line).ToDictionary(x => x.Key, x => x.Value);
 
-    public static Dictionary<string, TimingAppDataPoint.Driver> GetOrderedLines(
-        this TimingAppDataPoint data
-    ) => data.Lines.OrderBy(x => x.Value.Line).ToDictionary(x => x.Key, x => x.Value);
-
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Style",
         "IDE0046:Convert to conditional expression",
