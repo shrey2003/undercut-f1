@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <PackageId>undercutf1</PackageId>
@@ -13,7 +12,6 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="InMemoryLogger" />
     <PackageReference Include="LiveChartsCore" />
@@ -38,16 +36,17 @@
     <PackageReference Include="Vezel.Cathode" />
     <PackageReference Include="Vezel.Cathode.Extensions" />
   </ItemGroup>
-
   <ItemGroup>
-		<ProjectReference Include="..\UndercutF1.Data\UndercutF1.Data.csproj" />
-	</ItemGroup>
-
+    <ProjectReference Include="..\UndercutF1.Data\UndercutF1.Data.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
-
-  <Target Name="OverrideVersion" AfterTargets="GetBuildVersion" Condition="'$(OverridePackageVersion)' != ''">
+  <Target
+    Name="OverrideVersion"
+    AfterTargets="GetBuildVersion"
+    Condition="'$(OverridePackageVersion)' != ''"
+  >
     <PropertyGroup>
       <PackageVersion>$(OverridePackageVersion)</PackageVersion>
       <AssemblyVersion>$(OverridePackageVersion)</AssemblyVersion>
@@ -57,5 +56,4 @@
       <NugetPackageVersion>$(OverridePackageVersion)</NugetPackageVersion>
     </PropertyGroup>
   </Target>
-
 </Project>

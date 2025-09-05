@@ -241,7 +241,8 @@ public class DriverTrackerDisplay : IDisplay
                 var position =
                     _positionData
                         .Latest.Position.LastOrDefault()
-                        ?.Entries.GetValueOrDefault(driverNumber) ?? new();
+                        ?.Entries.GetValueOrDefault(driverNumber)
+                    ?? new();
                 var gapToLeader = (
                     line.BestLapTime.ToTimeSpan() - bestDriver.Value.BestLapTime.ToTimeSpan()
                 )?.TotalSeconds;

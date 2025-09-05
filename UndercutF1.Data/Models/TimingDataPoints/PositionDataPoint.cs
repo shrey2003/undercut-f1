@@ -31,7 +31,6 @@ public sealed class PositionDataPoint : ILiveTimingDataPoint
             /// <summary>
             /// Y position of the car in 1/10ths of a meter (cm).
             /// </summary>
-
             public int? Y { get; set; }
 
             /// <summary>

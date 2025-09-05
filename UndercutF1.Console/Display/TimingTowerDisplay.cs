@@ -94,7 +94,8 @@ public class TimingTowerDisplay(
             var position =
                 positionData
                     .Latest.Position.LastOrDefault()
-                    ?.Entries.GetValueOrDefault(driverNumber) ?? new();
+                    ?.Entries.GetValueOrDefault(driverNumber)
+                ?? new();
             var car = carData.Latest.Entries.FirstOrDefault()?.Cars.GetValueOrDefault(driverNumber);
             var appData = timingAppData.Latest?.Lines.GetValueOrDefault(driverNumber) ?? new();
             var stint = appData.Stints.LastOrDefault().Value;
@@ -220,7 +221,8 @@ public class TimingTowerDisplay(
             var position =
                 positionData
                     .Latest.Position.LastOrDefault()
-                    ?.Entries.GetValueOrDefault(driverNumber) ?? new();
+                    ?.Entries.GetValueOrDefault(driverNumber)
+                ?? new();
             var appData = timingAppData.Latest?.Lines.GetValueOrDefault(driverNumber) ?? new();
             var stint = appData.Stints.LastOrDefault().Value;
             var bestLap = timingData.BestLaps.GetValueOrDefault(driverNumber);

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-
   <PropertyGroup>
     <Authors>Aman Dhoot</Authors>
     <Company>Undercut F1</Company>
@@ -16,9 +15,7 @@
     <NBGV_ThisAssemblyIncludesPackageVersion>true</NBGV_ThisAssemblyIncludesPackageVersion>
     <NoWarn>$(NoWarn);CS1573;CS1591;</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" />
   </ItemGroup>
-
 </Project>

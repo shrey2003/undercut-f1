@@ -21,7 +21,6 @@ public class DownloadTranscriptionModelDisplay(ITranscriptionProvider transcript
 
             Once downloaded, you'll be sent back to the Team Radio list so you can try to transcribe again.
 
-            
             """;
 
         var downloadProgress = Math.Ceiling(transcriptionProvider.DownloadProgress * 100);

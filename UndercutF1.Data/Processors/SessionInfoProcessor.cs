@@ -30,8 +30,8 @@ public class SessionInfoProcessor(
         )
         {
             // Load circuit points from the external API as it hasn't been loaded yet
-            _loadCircuitTask = Task.Run(
-                () => LoadCircuitPoints(data.Meeting!.Circuit!.Key.Value, data.StartDate)
+            _loadCircuitTask = Task.Run(() =>
+                LoadCircuitPoints(data.Meeting!.Circuit!.Key.Value, data.StartDate)
             );
         }
     }

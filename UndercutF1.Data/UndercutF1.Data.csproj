@@ -1,12 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>UndercutF1.Data</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>formula1;f1;livetiming;timing</PackageTags>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="AutoMapper.Collection" />
@@ -21,9 +19,7 @@
     <PackageReference Include="Whisper.net" />
     <PackageReference Include="Whisper.net.Runtime" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
-
 </Project>
