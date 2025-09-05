@@ -59,6 +59,7 @@ public class DriverTrackerDisplay : IDisplay
     private readonly CarDataProcessor _carData;
     private readonly SessionInfoProcessor _sessionInfo;
     private readonly TerminalInfoProvider _terminalInfo;
+    private readonly Formula1Account _accountService;
     private readonly IOptions<Options> _options;
     private TransformFactors? _transform = null;
 
@@ -74,6 +75,7 @@ public class DriverTrackerDisplay : IDisplay
         CarDataProcessor carData,
         SessionInfoProcessor sessionInfo,
         TerminalInfoProvider terminalInfo,
+        Formula1Account accountService,
         IOptions<Options> options
     )
     {
@@ -85,6 +87,7 @@ public class DriverTrackerDisplay : IDisplay
         _carData = carData;
         _sessionInfo = sessionInfo;
         _terminalInfo = terminalInfo;
+        _accountService = accountService;
         _options = options;
 
         // The transform factors are dependant on the size of the terminal, so force a recalc if the size changes
@@ -131,13 +134,16 @@ public class DriverTrackerDisplay : IDisplay
             }
             else if (_positionData.Latest.Position.Last().Entries.Count == 0)
             {
+                var authStatus = _accountService.IsAuthenticated.Value;
                 trackMapMessage = $"""
 
                     [yellow]Unable to find any Car Position data for the current session.[/]
                     Position data for live sessions now requires an F1 TV subscription.
                     Login to your F1 TV account (which has an active subscription) using [bold]undercutf1 login[/] to access this data feed.
 
-                    If you face any issues, please raise an issue on GitHub at https://github.com/JustAman62/undercut-f1 and I'd be happy to assist!
+                    If you face any issues, please raise an issue on GitHub at https://github.com/JustAman62/undercut-f1 with the below information and I'd be happy to assist!
+
+                    [bold]F1 TV Account:[/] {authStatus}
                     """;
             }
         }

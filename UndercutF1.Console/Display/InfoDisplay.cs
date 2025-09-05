@@ -27,7 +27,7 @@ public sealed class InfoDisplay(
             [bold]Audible Notifications:[/] {options.Value.Notify}
             [bold]Verbose Mode:[/]          {options.Value.Verbose}
             [bold]Forced Protocol:[/]       {options.Value.ForceGraphicsProtocol?.ToString() ?? "None"}
-            [bold]F1 TV Account:[/]         {(payload is null ? "None" : authStatus)}
+            [bold]F1 TV Account:[/]         {authStatus}
             [bold]Config Override File:[/]  {File.Exists(
                 Options.ConfigFilePath
             )} ({Options.ConfigFilePath})

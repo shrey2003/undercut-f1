@@ -5,6 +5,8 @@ using UndercutF1.Data;
 namespace UndercutF1.Console;
 
 public sealed class ChampionshipStatsDisplay(
+    Formula1Account accountService,
+    SessionInfoProcessor sessionInfo,
     ChampionshipPredictionProcessor championshipPrediction,
     TimingStatsProcessor timingStatsProcessor,
     DriverListProcessor driverList
@@ -73,6 +75,11 @@ public sealed class ChampionshipStatsDisplay(
 
     private IRenderable GetTeamsChampionshipTable()
     {
+        if (ShouldDisplayInfoMessage(out var output))
+        {
+            return output;
+        }
+
         var table = new Table();
         table.AddColumns(
             new TableColumn("Pos") { Width = 4, Alignment = Justify.Left },
@@ -150,5 +157,38 @@ public sealed class ChampionshipStatsDisplay(
         }
 
         return new Columns(tables) { Expand = false };
+    }
+
+    private bool ShouldDisplayInfoMessage(out IRenderable output)
+    {
+        if (!sessionInfo.Latest.IsRace())
+        {
+            output = new Markup(
+                """
+                Championship tables are only available during race sessions.
+                """
+            );
+            return true;
+        }
+
+        if (championshipPrediction.Latest.Teams.Count == 0)
+        {
+            var authStatus = accountService.IsAuthenticated.Value;
+            output = new Markup(
+                $"""
+                [yellow]Unable to find championship data for the current session.[/]
+                Championship data for live sessions now requires an F1 TV subscription.
+                Login to your F1 TV account (which has an active subscription) using [bold]undercutf1 login[/] to access this data feed.
+
+                If you face any issues, please raise an issue on GitHub at https://github.com/JustAman62/undercut-f1 with the below information and I'd be happy to assist!
+
+                [bold]F1 TV Account Status:[/] {authStatus}
+                """
+            );
+            return true;
+        }
+
+        output = new Text(string.Empty);
+        return false;
     }
 }
