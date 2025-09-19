@@ -97,7 +97,7 @@ public sealed partial class TerminalInfoProvider
         }
 
         PrepareTerminal();
-        var buffer = ArrayPool<byte>.Shared.Rent(128);
+        var buffer = RentBuffer();
         try
         {
             // Query the terminal with a graphic protocol specific escape code
@@ -142,7 +142,7 @@ public sealed partial class TerminalInfoProvider
 
     private bool GetSynchronizedOutputSupported()
     {
-        var buffer = ArrayPool<byte>.Shared.Rent(128);
+        var buffer = RentBuffer();
         try
         {
             // Send a DECRQM query to the terminal to check for support
@@ -195,7 +195,7 @@ public sealed partial class TerminalInfoProvider
     private TerminalSizeInfo GetTerminalSize()
     {
         PrepareTerminal();
-        var buffer = ArrayPool<byte>.Shared.Rent(128);
+        var buffer = RentBuffer();
         try
         {
             // Send a DCS query to the terminal to query terminal size
@@ -272,7 +272,7 @@ public sealed partial class TerminalInfoProvider
         }
 
         PrepareTerminal();
-        var buffer = ArrayPool<byte>.Shared.Rent(128);
+        var buffer = RentBuffer();
         try
         {
             // Send a primary device attributes request
@@ -313,9 +313,16 @@ public sealed partial class TerminalInfoProvider
         }
     }
 
-    private void DiscardExtraResponse()
+    private static byte[] RentBuffer()
     {
         var buffer = ArrayPool<byte>.Shared.Rent(128);
+        Array.Fill(buffer, (byte)0);
+        return buffer;
+    }
+
+    private void DiscardExtraResponse()
+    {
+        var buffer = RentBuffer();
         try
         {
             _logger.LogDebug("Reading extra device attr response to discard");
