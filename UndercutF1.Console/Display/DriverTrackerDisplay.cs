@@ -392,31 +392,7 @@ public class DriverTrackerDisplay : IDisplay
         }
 
         var image = surface.Snapshot();
-
-        if (_terminalInfo.IsKittyProtocolSupported.Value)
-        {
-            var imageData = image.Encode();
-            var base64 = Convert.ToBase64String(imageData.AsSpan());
-            return
-            [
-                TerminalGraphics.KittyGraphicsSequenceDelete(),
-                .. TerminalGraphics.KittyGraphicsSequence(windowHeight, windowWidth, base64),
-            ];
-        }
-        else if (_terminalInfo.IsITerm2ProtocolSupported.Value)
-        {
-            var imageData = image.Encode();
-            var base64 = Convert.ToBase64String(imageData.AsSpan());
-            return [TerminalGraphics.ITerm2GraphicsSequence(windowHeight, windowWidth, base64)];
-        }
-        else if (_terminalInfo.IsSixelSupported.Value)
-        {
-            var bitmap = SKBitmap.FromImage(image);
-            var sixelData = Sixel.ImageToSixel(bitmap.Pixels, bitmap.Width);
-            return [TerminalGraphics.SixelGraphicsSequence(sixelData)];
-        }
-
-        return ["Unexpected error, shouldn't have got here. Please report!"];
+        return image.ToGraphicsSequence(_terminalInfo, windowHeight, windowWidth);
     }
 
     private TransformFactors GetTransformFactors()

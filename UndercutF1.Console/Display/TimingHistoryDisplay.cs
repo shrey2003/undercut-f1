@@ -366,30 +366,7 @@ public class TimingHistoryDisplay(
             canvas.DrawText($"Height: {heightPixels}", 5, 40, _errorPaint);
         }
 
-        if (terminalInfo.IsKittyProtocolSupported.Value)
-        {
-            var imageData = surface.Snapshot().Encode();
-            var base64 = Convert.ToBase64String(imageData.AsSpan());
-            return
-            [
-                TerminalGraphics.KittyGraphicsSequenceDelete(),
-                .. TerminalGraphics.KittyGraphicsSequence(heightCells, widthCells, base64),
-            ];
-        }
-        else if (terminalInfo.IsITerm2ProtocolSupported.Value)
-        {
-            var imageData = surface.Snapshot().Encode();
-            var base64 = Convert.ToBase64String(imageData.AsSpan());
-            return [TerminalGraphics.ITerm2GraphicsSequence(heightCells, widthCells, base64)];
-        }
-        else if (terminalInfo.IsSixelSupported.Value)
-        {
-            var bitmap = SKBitmap.FromImage(surface.Snapshot());
-            var sixelData = Sixel.ImageToSixel(bitmap.Pixels, bitmap.Width);
-            return [TerminalGraphics.SixelGraphicsSequence(sixelData)];
-        }
-
-        return ["Unexpected error, shouldn't have got here. Please report!"];
+        return surface.Snapshot().ToGraphicsSequence(terminalInfo, heightCells, widthCells);
     }
 
     private SKCartesianChart CreateChart(

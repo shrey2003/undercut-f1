@@ -37,8 +37,8 @@ public sealed class InfoDisplay(
             [bold]Terminal Diagnostics[/]
             [bold]TERM_PROGRAM:[/]        {Environment.GetEnvironmentVariable("TERM_PROGRAM")}
             [bold]Window Size W/H:[/]     {terminalInfo.TerminalSize.Value.Width}/{terminalInfo.TerminalSize.Value.Height} ({terminalInfo.TerminalSize.Value.Height / Terminal.Size.Height})
-            [bold]Kitty Graphics:[/]      {terminalInfo.IsKittyProtocolSupported.Value}
             [bold]iTerm2 Graphics:[/]     {terminalInfo.IsITerm2ProtocolSupported.Value}
+            [bold]Kitty Graphics:[/]      {terminalInfo.IsKittyProtocolSupported.Value}
             [bold]Sixel Graphics:[/]      {terminalInfo.IsSixelSupported.Value}
             [bold]Synchronized Output:[/] {terminalInfo.IsSynchronizedOutputSupported.Value}
             [bold]Version:[/]             {ThisAssembly.AssemblyInformationalVersion}
