@@ -27,12 +27,10 @@ public class MainDisplay(
             """
         ).Centered();
 
-        var authStatus = accountService.IsAuthenticated.Value;
-        var payload = accountService.Payload.Value;
-        var accountDetail = authStatus switch
+        var accountDetail = accountService.IsAuthenticated switch
         {
             Formula1Account.AuthenticationResult.Success => $"""
-                [green]Logged in to F1 TV account.[/] Token will expire on [bold]{payload!.Expiry:yyyy-MM-dd}[/]
+                [green]Logged in to F1 TV account.[/] Token will expire on [bold]{accountService.Payload!.Expiry:yyyy-MM-dd}[/]
                 """,
             Formula1Account.AuthenticationResult.ExpiredToken => """
                 [yellow]Formula 1 account token has expired! Please run the following to log back in:[/]

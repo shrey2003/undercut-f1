@@ -134,7 +134,6 @@ public class DriverTrackerDisplay : IDisplay
             }
             else if (_positionData.Latest.Position.Last().Entries.Count == 0)
             {
-                var authStatus = _accountService.IsAuthenticated.Value;
                 trackMapMessage = $"""
 
                     [yellow]Unable to find any Car Position data for the current session.[/]
@@ -143,7 +142,7 @@ public class DriverTrackerDisplay : IDisplay
 
                     If you face any issues, please raise an issue on GitHub at https://github.com/JustAman62/undercut-f1 with the below information and I'd be happy to assist!
 
-                    [bold]F1 TV Account:[/] {authStatus}
+                    [bold]F1 TV Account:[/] {_accountService.IsAuthenticated}
                     """;
             }
         }

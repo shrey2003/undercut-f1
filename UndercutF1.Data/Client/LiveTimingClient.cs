@@ -65,7 +65,7 @@ public sealed class LiveTimingClient(
                 configure =>
                 {
                     configure.AccessTokenProvider = () =>
-                        Task.FromResult(formula1Account.AccessToken.Value);
+                        Task.FromResult(formula1Account.AccessToken);
                 }
             )
             .WithAutomaticReconnect()

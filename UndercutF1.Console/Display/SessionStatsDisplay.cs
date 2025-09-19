@@ -173,7 +173,6 @@ public sealed class ChampionshipStatsDisplay(
 
         if (championshipPrediction.Latest.Teams.Count == 0)
         {
-            var authStatus = accountService.IsAuthenticated.Value;
             output = new Markup(
                 $"""
                 [yellow]Unable to find championship data for the current session.[/]
@@ -182,7 +181,7 @@ public sealed class ChampionshipStatsDisplay(
 
                 If you face any issues, please raise an issue on GitHub at https://github.com/JustAman62/undercut-f1 with the below information and I'd be happy to assist!
 
-                [bold]F1 TV Account Status:[/] {authStatus}
+                [bold]F1 TV Account Status:[/] {accountService.IsAuthenticated}
                 """
             );
             return true;

@@ -15,18 +15,18 @@ public sealed class Formula1Account
         _options = options;
         _logger = logger;
 
-        Payload = new(CheckToken(out var payload) == AuthenticationResult.Success ? payload : null);
-        IsAuthenticated = new(() => CheckToken(out _));
-        AccessToken = new(
-            IsAuthenticated.Value == AuthenticationResult.Success
+        var authResult = CheckToken(out var payload);
+        Payload = authResult == AuthenticationResult.Success ? payload : null;
+        IsAuthenticated = authResult;
+        AccessToken =
+            authResult == AuthenticationResult.Success
                 ? SubscriptionTokenFromAccessToken(options.Value.Formula1AccessToken!)
-                : null
-        );
+                : null;
     }
 
-    public Lazy<string?> AccessToken { get; }
-    public Lazy<TokenPayload?> Payload { get; }
-    public Lazy<AuthenticationResult> IsAuthenticated { get; }
+    public string? AccessToken { get; }
+    public TokenPayload? Payload { get; }
+    public AuthenticationResult IsAuthenticated { get; }
 
     private AuthenticationResult CheckToken(out TokenPayload? payload) =>
         CheckToken(_options.Value.Formula1AccessToken, out payload);

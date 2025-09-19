@@ -18,8 +18,6 @@ public sealed class InfoDisplay(
 
     public Task<IRenderable> GetContentAsync()
     {
-        var authStatus = accountService.IsAuthenticated.Value;
-        var payload = accountService.Payload.Value;
         var content = $"""
             [bold]Configuration[/]
             [bold]Data Directory:[/]        {options.Value.DataDirectory}
@@ -27,12 +25,12 @@ public sealed class InfoDisplay(
             [bold]Audible Notifications:[/] {options.Value.Notify}
             [bold]Verbose Mode:[/]          {options.Value.Verbose}
             [bold]Forced Protocol:[/]       {options.Value.ForceGraphicsProtocol?.ToString() ?? "None"}
-            [bold]F1 TV Account:[/]         {authStatus}
+            [bold]F1 TV Account:[/]         {accountService.IsAuthenticated}
             [bold]Config Override File:[/]  {File.Exists(
                 Options.ConfigFilePath
             )} ({Options.ConfigFilePath})
             See https://github.com/JustAman62/undercut-f1#configuration for information on how to configure these options.
-            [dim]{payload}[/]
+            [dim]{accountService.Payload}[/]
 
             [bold]Terminal Diagnostics[/]
             [bold]TERM_PROGRAM:[/]        {Environment.GetEnvironmentVariable("TERM_PROGRAM")}

@@ -18,7 +18,7 @@ public static partial class CommandHandler
         var app = builder.Build();
 
         var accountService = app.Services.GetRequiredService<Formula1Account>();
-        var existingPayload = accountService.Payload.Value;
+        var existingPayload = accountService.Payload;
 
         // Allow a relogin on the day of expiry but not before
         if (existingPayload is not null && existingPayload.Expiry.Date != DateTime.Today)
