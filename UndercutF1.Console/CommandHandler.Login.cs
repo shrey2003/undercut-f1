@@ -21,7 +21,7 @@ public static partial class CommandHandler
         var existingPayload = accountService.Payload;
 
         // Allow a relogin on the day of expiry but not before
-        if (existingPayload is not null && existingPayload.Expiry.Date != DateTime.Today)
+        if (existingPayload is not null && existingPayload.Expiry.Date >= DateTime.Today)
         {
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine(
@@ -44,10 +44,10 @@ public static partial class CommandHandler
             - Championship tables with live prediction
             - DRS active indicator on Timing Screen
 
-            Additionally, logging in is [bold]NOT[/] required if you import data for already completed sessions, as all data is always available after a session is complete.
+            Additionally, logging in is [bold]NOT[/] required for the above features if you import data for already completed sessions, as all data feeds are available after a session is complete.
 
             Once logged in, your access token will be stored in [bold]{Options.ConfigFilePath}[/]. Your actual account credentials will not be stored anywhere.
-            Simply remove the token entry from the file, or run [bold]undercutf1 logout[/] to prevent undercut-f1 from using your token.
+            Simply remove the token entry from this file, or run [bold]undercutf1 logout[/] to remove usage of your token.
             """;
 
         AnsiConsole.MarkupLine(preamble);
@@ -110,7 +110,7 @@ public static partial class CommandHandler
         AnsiConsole.MarkupLine(
             $"""
             Logging out will remove your access token stored in [bold]{Options.ConfigFilePath}[/].
-            To log back in again in the future, simply run [bold]undercut-f1 login[/].
+            To log back in again in the future, simply run [bold]undercutf1 login[/].
             """
         );
         AnsiConsole.WriteLine();
