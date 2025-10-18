@@ -187,9 +187,9 @@ public class TimingTowerDisplay(
                 },
                 new TableColumn("Gap") { Width = 8, Alignment = Justify.Left },
                 new TableColumn("Best Lap") { Width = 9, Alignment = Justify.Left },
-                new TableColumn("BL S1") { Width = 15, Alignment = Justify.Left },
-                new TableColumn("BL S2") { Width = 15, Alignment = Justify.Left },
-                new TableColumn("BL S3") { Width = 15, Alignment = Justify.Left },
+                new TableColumn("BL S1") { Width = 12, Alignment = Justify.Left },
+                new TableColumn("BL S2") { Width = 12, Alignment = Justify.Left },
+                new TableColumn("BL S3") { Width = 12, Alignment = Justify.Left },
                 new TableColumn("Last Lap") { Width = 9, Alignment = Justify.Left },
                 new TableColumn("S1") { Alignment = Justify.Left },
                 new TableColumn("S2") { Alignment = Justify.Left },
@@ -317,13 +317,23 @@ public class TimingTowerDisplay(
 
         var differenceToBest = time?.ToTimeSpan() - bestSector?.ToTimeSpan();
         var differenceColor = differenceToBest < TimeSpan.Zero ? "green" : "white";
+
         var difference = differenceToBest.HasValue
-            ? $"[dim italic {differenceColor}]({(differenceToBest >= TimeSpan.Zero ? "+" : string.Empty)}{differenceToBest:s\\.fff})[/]"
+            ? $"[dim italic {differenceColor}]{GetDifferenceToBestString(differenceToBest)}[/]"
             : string.Empty;
         return differenceToBest < TimeSpan.FromSeconds(10) && showDifference
             ? new Markup($"{sector}{difference}")
             : new Markup($"{sector} ");
     }
+
+    private static string GetDifferenceToBestString(TimeSpan? difference) =>
+        // we want to display exactly 4 chars, so if the seconds is 0 then skip it
+        difference switch
+        {
+            null => string.Empty,
+            _ when difference > TimeSpan.FromSeconds(1) => difference.Value.ToString("\\+s\\.ff"),
+            _ => difference.Value.ToString("\\+\\.fff"),
+        };
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Style",
