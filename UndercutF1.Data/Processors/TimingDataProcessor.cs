@@ -30,7 +30,7 @@ public class TimingDataProcessor(IMapper mapper) : IProcessor<TimingDataPoint>
 
         foreach (var (driverNumber, lapUpdate) in data.Lines)
         {
-            TrackPitLaps(driverNumber, lapUpdate);
+            PushCustomProperties(driverNumber, lapUpdate);
 
             // Super hacky way of doing a clean clone. Using AutoMapper seems to not clone the Sectors array properly.
             // We need this clone because we want to store a snapshot of the lap which means we don't want to store the
@@ -108,11 +108,22 @@ public class TimingDataProcessor(IMapper mapper) : IProcessor<TimingDataPoint>
         }
     }
 
-    private void TrackPitLaps(string driverNumber, TimingDataPoint.Driver partialUpdate)
+    private void PushCustomProperties(string driverNumber, TimingDataPoint.Driver partialUpdate)
     {
+        var line = Latest.Lines.GetValueOrDefault(driverNumber);
+        if (line is null)
+            return;
+
+        // If the update indicates this is a pit lap, then mark the current data point as a pit lap
         if (partialUpdate.PitOut.GetValueOrDefault() || partialUpdate.InPit.GetValueOrDefault())
         {
-            Latest.Lines.GetValueOrDefault(driverNumber)!.IsPitLap = true;
+            line.IsPitLap = true;
+        }
+
+        // Push down the SessionPart property if it exists and is not already set
+        if (line.SessionPart != Latest.SessionPart)
+        {
+            line.SessionPart = Latest.SessionPart;
         }
     }
 }

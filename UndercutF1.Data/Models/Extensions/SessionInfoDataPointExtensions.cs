@@ -18,6 +18,8 @@ public static class SessionInfoDataPointExtensions
     }
 
     public static bool IsRace(this SessionInfoDataPoint? sessionInfo) =>
-        (sessionInfo?.Name?.EndsWith("Race") ?? true)
-        || (sessionInfo?.Name?.EndsWith("Sprint") ?? true);
+        sessionInfo?.Type == "Race";
+
+    public static bool IsQualifying(this SessionInfoDataPoint? sessionInfo) =>
+        sessionInfo?.Type == "Qualifying";
 }

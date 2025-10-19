@@ -255,6 +255,10 @@ public class TimingService(
                 SendToProcessor<PitStopSeriesDataPoint>(json);
                 break;
             case LiveTimingDataType.PitLaneTimeCollection:
+                if (json["PitTimes"] is not null)
+                {
+                    json["PitTimes"]!.AsObject().Remove("_deleted");
+                }
                 SendToProcessor<PitLaneTimeCollectionDataPoint>(json);
                 break;
         }

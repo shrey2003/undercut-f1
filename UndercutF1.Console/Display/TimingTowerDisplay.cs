@@ -26,10 +26,7 @@ public class TimingTowerDisplay(
     {
         var statusPanel = common.GetStatusPanel();
 
-        var raceControlPanel =
-            state.CursorOffset > 0 && sessionInfoProcessor.Latest.IsRace()
-                ? GetComparisonPanel()
-                : GetRaceControlPanel();
+        var infoPanel = GetInfoPanel();
         var timingTower = sessionInfoProcessor.Latest.IsRace()
             ? GetRaceTimingTower()
             : GetNonRaceTimingTower();
@@ -39,7 +36,7 @@ public class TimingTowerDisplay(
             new Layout("Info")
                 .SplitColumns(
                     new Layout("Status", statusPanel).Size(STATUS_PANEL_WIDTH),
-                    new Layout("Race Control Messages", raceControlPanel)
+                    new Layout("Detail", infoPanel)
                 )
                 .Size(6)
         );
@@ -49,6 +46,9 @@ public class TimingTowerDisplay(
 
     private IRenderable GetRaceTimingTower()
     {
+        if (timingData.Latest is null || timingData.Latest.Lines.Count == 0)
+            return new Text("No Timing Available");
+
         var lap = lapCountProcessor.Latest;
         var table = new Table();
         table
@@ -175,7 +175,7 @@ public class TimingTowerDisplay(
 
     private IRenderable GetNonRaceTimingTower()
     {
-        if (timingData.Latest is null)
+        if (timingData.Latest is null || timingData.Latest.Lines.Count == 0)
             return new Text("No Timing Available");
 
         var table = new Table()
@@ -187,9 +187,9 @@ public class TimingTowerDisplay(
                 },
                 new TableColumn("Gap") { Width = 8, Alignment = Justify.Left },
                 new TableColumn("Best Lap") { Width = 9, Alignment = Justify.Left },
-                new TableColumn("BL S1") { Width = 15, Alignment = Justify.Left },
-                new TableColumn("BL S2") { Width = 15, Alignment = Justify.Left },
-                new TableColumn("BL S3") { Width = 15, Alignment = Justify.Left },
+                new TableColumn("BL S1") { Width = 12, Alignment = Justify.Left },
+                new TableColumn("BL S2") { Width = 12, Alignment = Justify.Left },
+                new TableColumn("BL S3") { Width = 12, Alignment = Justify.Left },
                 new TableColumn("Last Lap") { Width = 9, Alignment = Justify.Left },
                 new TableColumn("S1") { Alignment = Justify.Left },
                 new TableColumn("S2") { Alignment = Justify.Left },
@@ -226,6 +226,8 @@ public class TimingTowerDisplay(
             var appData = timingAppData.Latest?.Lines.GetValueOrDefault(driverNumber) ?? new();
             var stint = appData.Stints.LastOrDefault().Value;
             var bestLap = timingData.BestLaps.GetValueOrDefault(driverNumber);
+            var isSelectedDriver =
+                sessionInfoProcessor.Latest.IsQualifying() && line.Line == state.CursorOffset;
 
             var gapToLeader = (
                 line.BestLapTime.ToTimeSpan() - bestDriver.Value.BestLapTime.ToTimeSpan()
@@ -233,12 +235,12 @@ public class TimingTowerDisplay(
 
             if (line.KnockedOut.GetValueOrDefault())
             {
-                table.AddRow(DisplayUtils.DriverTag(driver, line, selected: false));
+                table.AddRow(DisplayUtils.DriverTag(driver, line, selected: isSelectedDriver));
                 continue;
             }
 
             table.AddRow(
-                DisplayUtils.DriverTag(driver, line, selected: false),
+                DisplayUtils.DriverTag(driver, line, selected: isSelectedDriver),
                 position.Status == PositionDataPoint.PositionData.Entry.DriverStatus.OffTrack
                     ? new Text("OFF TRK", new Style(background: Color.Red, foreground: Color.White))
                     : new Text(
@@ -317,13 +319,23 @@ public class TimingTowerDisplay(
 
         var differenceToBest = time?.ToTimeSpan() - bestSector?.ToTimeSpan();
         var differenceColor = differenceToBest < TimeSpan.Zero ? "green" : "white";
+
         var difference = differenceToBest.HasValue
-            ? $"[dim italic {differenceColor}]({(differenceToBest >= TimeSpan.Zero ? "+" : string.Empty)}{differenceToBest:s\\.fff})[/]"
+            ? $"[dim italic {differenceColor}]{GetDifferenceToBestString(differenceToBest)}[/]"
             : string.Empty;
         return differenceToBest < TimeSpan.FromSeconds(10) && showDifference
             ? new Markup($"{sector}{difference}")
             : new Markup($"{sector} ");
     }
+
+    private static string GetDifferenceToBestString(TimeSpan? difference) =>
+        // we want to display exactly 4 chars, so if the seconds is 0 then skip it
+        difference switch
+        {
+            null => string.Empty,
+            _ when difference > TimeSpan.FromSeconds(1) => difference.Value.ToString("\\+s\\.ff"),
+            _ => difference.Value.ToString("\\+\\.fff"),
+        };
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Style",
@@ -360,6 +372,22 @@ public class TimingTowerDisplay(
         bestLap?.ToTimeSpan() == time?.ToTimeSpan()
             ? DisplayUtils.STYLE_BEST
             : DisplayUtils.STYLE_NORMAL;
+
+    private IRenderable GetInfoPanel()
+    {
+        if (state.CursorOffset > 0)
+        {
+            if (sessionInfoProcessor.Latest.IsRace())
+            {
+                return GetComparisonPanel();
+            }
+            else if (sessionInfoProcessor.Latest.IsQualifying())
+            {
+                return GetQualifyingLapHistoryPanel();
+            }
+        }
+        return GetRaceControlPanel();
+    }
 
     private IRenderable GetRaceControlPanel()
     {
@@ -503,5 +531,46 @@ public class TimingTowerDisplay(
             ?.SmartGapToLeaderSeconds(nextDriverNumber);
 
         return nextGapToLeader - prevGapToLeader ?? 0;
+    }
+
+    private IRenderable GetQualifyingLapHistoryPanel()
+    {
+        var selectedDriver = timingData.Latest.Lines.FirstOrDefault(x =>
+            x.Value.Line == state.CursorOffset
+        );
+
+        if (selectedDriver.Value is null)
+            return Text.Empty;
+
+        var columns = new Columns(
+            GetSessionPartLaps(selectedDriver.Key, 1),
+            GetSessionPartLaps(selectedDriver.Key, 2),
+            GetSessionPartLaps(selectedDriver.Key, 3)
+        ).Collapse();
+
+        return new Panel(columns).NoBorder();
+    }
+
+    private Rows GetSessionPartLaps(string driverNumber, int sessionPart)
+    {
+        var lapsInSessionPart = timingData
+            .DriversByLap.Values.Select(x => x.GetValueOrDefault(driverNumber))
+            .Where(x => x?.SessionPart == sessionPart && !x.IsPitLap)
+            .OfType<TimingDataPoint.Driver>()
+            .Take(5)
+            .OrderByDescending(x => x.NumberOfLaps)
+            .ToList();
+
+        var fastestLap = lapsInSessionPart.MinBy(x => x.LastLapTime?.ToTimeSpan());
+
+        var lapRows = lapsInSessionPart.Select(lap =>
+        {
+            var style = lap == fastestLap ? DisplayUtils.STYLE_PB : Style.Plain;
+            return new Text($"LAP {lap.NumberOfLaps:D2}: {lap.LastLapTime?.Value}", style);
+        });
+
+        List<Text> rows = [new Text($"Q{sessionPart}").Centered(), .. lapRows];
+
+        return new Rows(rows);
     }
 }

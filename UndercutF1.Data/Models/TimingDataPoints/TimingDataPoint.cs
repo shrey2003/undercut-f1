@@ -5,6 +5,12 @@ public sealed record TimingDataPoint : ILiveTimingDataPoint
     /// <inheritdoc />
     public LiveTimingDataType LiveTimingDataType => LiveTimingDataType.TimingData;
 
+    /// <summary>
+    /// In qualifying sessions, this is set to 1 for Q1, 2 for Q2, etc.
+    /// <c>null</c> in all other sessions.
+    /// </summary>
+    public int? SessionPart { get; set; }
+
     public Dictionary<string, Driver> Lines { get; set; } = new();
 
     public sealed record Driver
@@ -31,6 +37,14 @@ public sealed record TimingDataPoint : ILiveTimingDataPoint
         /// The intention of the property is to allow for easy filtering of non-flying laps from lap-by-lap data.
         /// </summary>
         public bool IsPitLap { get; set; }
+
+        /// <summary>
+        /// A custom property which indicates which part of Qualifying this lap was set in.
+        /// Only set after a lap is completed.
+        /// <c>null</c> in all non-qualifying sessions.
+        /// Value is pushed down from <see cref="TimingDataPoint.SessionPart"/>.
+        /// </summary>
+        public int? SessionPart { get; set; }
 
         public int? NumberOfLaps { get; set; }
         public LapSectorTime? LastLapTime { get; set; }
