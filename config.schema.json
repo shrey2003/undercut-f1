@@ -36,6 +36,10 @@
       ],
       "description": "If provided, forces the app to output images using the given protocol.\nOtherwise, heuristics and queries will be used to determine if graphics are supported, and which protocol to use."
     },
+    "preventDisplaySleep": {
+      "type": "boolean",
+      "description": "Whwther the app should try to prevent the display from turning off/sleeping whilst running.\nThis is similar to running \u003Cc\u003Ecaffeinate -d undercutf1\u003C/c\u003E on macOS."
+    },
     "externalPlayerSync": {
       "description": "Options to configure the external player synchronisation service",
       "type": [

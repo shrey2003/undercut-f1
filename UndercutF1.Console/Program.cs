@@ -28,6 +28,11 @@ var preferFfmpegOption = new Option<bool?>("--prefer-ffmpeg")
     Description =
         "Prefer the usage of `ffplay` for playing Team Radio on Mac/Linux, instead of afplay/mpg123. `ffplay` is always used on Windows",
 };
+var preventSleepOption = new Option<bool?>("--prevent-sleep")
+{
+    Description =
+        "Attempt to prevent the device/display from sleeping whilst the app is running. Intended to help prevent accidental stream disconnection due to inactivity on your device.",
+};
 var forceGraphicsProtocol = new Option<GraphicsProtocol?>("--force-graphics-protocol")
 {
     Description = "Forces the usage of a particular graphics protocol.",
@@ -41,6 +46,7 @@ var rootCommand = new RootCommand("undercutf1")
     logDirectoryOption,
     notifyOption,
     preferFfmpegOption,
+    preventSleepOption,
     forceGraphicsProtocol,
 };
 
@@ -52,6 +58,7 @@ rootCommand.SetAction(parseResult =>
         parseResult.GetValue(isVerboseOption),
         parseResult.GetValue(notifyOption),
         parseResult.GetValue(preferFfmpegOption),
+        parseResult.GetValue(preventSleepOption),
         parseResult.GetValue(forceGraphicsProtocol)
     )
 );
@@ -109,6 +116,7 @@ var infoCommand = new Command(
     isVerboseOption,
     notifyOption,
     preferFfmpegOption,
+    preventSleepOption,
     forceGraphicsProtocol,
 };
 infoCommand.SetAction(res =>
@@ -118,6 +126,7 @@ infoCommand.SetAction(res =>
         res.GetValue(isVerboseOption),
         res.GetValue(notifyOption),
         res.GetValue(preferFfmpegOption),
+        res.GetValue(preventSleepOption),
         res.GetValue(forceGraphicsProtocol)
     )
 );

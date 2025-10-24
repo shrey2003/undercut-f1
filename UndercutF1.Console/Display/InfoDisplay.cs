@@ -25,6 +25,7 @@ public sealed class InfoDisplay(
             [bold]Audible Notifications:[/] {options.Value.Notify}
             [bold]Verbose Mode:[/]          {options.Value.Verbose}
             [bold]Forced Protocol:[/]       {options.Value.ForceGraphicsProtocol?.ToString() ?? "None"}
+            [bold]Prevent Display Sleep:[/] {options.Value.PreventDisplaySleep}
             [bold]F1 TV Account:[/]         {accountService.IsAuthenticated}
             [bold]Config Override File:[/]  {File.Exists(
                 Options.ConfigFilePath
