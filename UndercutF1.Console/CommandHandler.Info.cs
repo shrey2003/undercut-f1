@@ -12,6 +12,7 @@ public static partial class CommandHandler
         bool? isVerbose,
         bool? notifyEnabled,
         bool? preferFfmpeg,
+        bool? preventDisplaySleep,
         GraphicsProtocol? forceGraphicsProtocol
     )
     {
@@ -21,6 +22,7 @@ public static partial class CommandHandler
             isVerbose: isVerbose,
             notifyEnabled: notifyEnabled,
             preferFfmpeg: preferFfmpeg,
+            preventDisplaySleep: preventDisplaySleep,
             forceGraphicsProtocol: forceGraphicsProtocol
         );
 

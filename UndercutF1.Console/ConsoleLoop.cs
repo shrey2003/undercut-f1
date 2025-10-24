@@ -1,5 +1,7 @@
 using System.Buffers;
 using System.Diagnostics;
+using InhibitSleep.Net;
+using Microsoft.Extensions.Options;
 using Spectre.Console;
 using Spectre.Console.Advanced;
 using Spectre.Console.Rendering;
@@ -13,6 +15,7 @@ public class ConsoleLoop(
     IEnumerable<IInputHandler> inputHandlers,
     IHostApplicationLifetime hostApplicationLifetime,
     TerminalInfoProvider terminalInfo,
+    IOptions<Options> options,
     ILogger<ConsoleLoop> logger
 ) : BackgroundService
 {
@@ -25,6 +28,7 @@ public class ConsoleLoop(
     private string _previousDraw = string.Empty;
     private bool _stopped = false;
     private int _slowFrameReports = 0;
+    private SleepInhibitor? _sleepInhibitor;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -149,13 +153,15 @@ public class ConsoleLoop(
             CancellationToken.None
         );
 
+        _sleepInhibitor?.ReleaseInhibition();
+
         _stopped = true;
 
         await base.StopAsync(cancellationToken);
         hostApplicationLifetime.StopApplication();
     }
 
-    private static async Task SetupTerminalAsync(CancellationToken cancellationToken)
+    private async Task SetupTerminalAsync(CancellationToken cancellationToken)
     {
         await Terminal.OutAsync(
             ControlSequences.SetScreenBuffer(ScreenBuffer.Alternate),
@@ -165,6 +171,16 @@ public class ConsoleLoop(
         await Terminal.OutAsync(ControlSequences.SetCursorVisibility(false), cancellationToken);
         await Terminal.OutAsync(ControlSequences.MoveCursorTo(0, 0), cancellationToken);
         await Terminal.OutAsync(ControlSequences.ClearScreen(ClearMode.Full), cancellationToken);
+
+        if (options.Value.PreventDisplaySleep)
+        {
+            logger.LogInformation(
+                "{OptionName} is enabled, attempting to prevent device sleep",
+                nameof(Options.PreventDisplaySleep)
+            );
+            _sleepInhibitor ??= new("undercutf1");
+            _sleepInhibitor.InhibitSleep();
+        }
     }
 
     private static async Task SetupBufferAsync(CancellationToken cancellationToken) =>

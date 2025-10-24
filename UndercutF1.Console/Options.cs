@@ -33,6 +33,12 @@ public sealed record Options : LiveTimingOptions
     /// </summary>
     public GraphicsProtocol? ForceGraphicsProtocol { get; set; } = null;
 
+    /// <summary>
+    /// Whwther the app should try to prevent the display from turning off/sleeping whilst running.
+    /// This is similar to running <c>caffeinate -d undercutf1</c> on macOS.
+    /// </summary>
+    public bool PreventDisplaySleep { get; set; } = false;
+
     /// <inheritdoc cref="ExternalPlayerSync.SyncOptions" />
     public ExternalPlayerSync.SyncOptions? ExternalPlayerSync { get; set; }
 

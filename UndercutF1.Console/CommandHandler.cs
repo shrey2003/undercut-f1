@@ -18,6 +18,7 @@ public static partial class CommandHandler
         bool? isVerbose = false,
         bool? notifyEnabled = null,
         bool? preferFfmpeg = null,
+        bool? preventDisplaySleep = null,
         GraphicsProtocol? forceGraphicsProtocol = null,
         bool useConsoleLogging = false
     )
@@ -48,6 +49,13 @@ public static partial class CommandHandler
         if (preferFfmpeg is not null)
         {
             commandLineOpts.Add(nameof(Options.PreferFfmpegPlayback), preferFfmpeg.ToString());
+        }
+        if (preventDisplaySleep is not null)
+        {
+            commandLineOpts.Add(
+                nameof(Options.PreventDisplaySleep),
+                preventDisplaySleep.ToString()
+            );
         }
         if (forceGraphicsProtocol is not null)
         {

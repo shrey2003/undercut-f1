@@ -13,6 +13,7 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="InhibitSleep.Net" />
     <PackageReference Include="InMemoryLogger" />
     <PackageReference Include="LiveChartsCore" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView" />
