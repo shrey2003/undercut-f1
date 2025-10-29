@@ -78,7 +78,7 @@ jobs:
           tag: ${{ github.ref }}
 
       - name: Upload ${{ matrix.target }} to Pull Request
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ github.event_name == 'pull_request'}}
         with:
           name: undercutf1-${{ matrix.target }}${{ contains(matrix.target, 'win') && '.exe' || ''}}
