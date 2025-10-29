@@ -1,5 +1,6 @@
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Drawing;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.SKCharts;
@@ -38,22 +39,23 @@ public class TimingHistoryDisplay(
         background: new Color(118, 0, 118)
     );
     private readonly Style _normal = new(foreground: Color.White);
-    private static readonly SKPaint _errorPaint = new()
-    {
-        Color = SKColor.Parse("FF0000"),
-        IsStroke = true,
-        Typeface = _boldTypeface,
-        IsAntialias = false,
-    };
+
     private static readonly SKTypeface _boldTypeface = SKTypeface.FromFamilyName(
         "Consolas",
         weight: SKFontStyleWeight.ExtraBold,
         width: SKFontStyleWidth.Normal,
         slant: SKFontStyleSlant.Upright
     );
+    private static readonly SKFont _boldFont = new(_boldTypeface);
+    private static readonly SKPaint _errorPaint = new()
+    {
+        Color = SKColor.Parse("FF0000"),
+        IsStroke = true,
+        IsAntialias = false,
+    };
 
-    private static readonly SolidColorPaint _lightGrayPaint = new(SKColors.LightGray);
-    private static readonly SolidColorPaint _labelsPaint = new(SKColors.LightGray);
+    private static readonly SolidColorPaint _lightGrayPaint = new(SKColors.DimGray);
+    private static readonly SolidColorPaint _labelsPaint = new(SKColors.DimGray);
 
     private static readonly SolidColorPaint _whitePaint = new(SKColors.White)
     {
@@ -303,7 +305,8 @@ public class TimingHistoryDisplay(
                 heightPixels / 2,
                 widthPixels,
                 labeler: Labelers.Default,
-                axisMin: 0
+                axisMin: 0,
+                yMinStep: 1
             );
             gapChart.DrawOnCanvas(canvas);
         }
@@ -342,7 +345,7 @@ public class TimingHistoryDisplay(
                     {
                         IsAntialias = false,
                     },
-                    DataPadding = new LiveChartsCore.Drawing.LvcPoint(1, 0),
+                    DataPadding = new LvcPoint(1, 0),
                 };
             })
             .ToArray();
@@ -362,8 +365,17 @@ public class TimingHistoryDisplay(
         {
             // Add some debug information when verbose mode is on
             canvas.DrawRect(0, 0, widthPixels - 1, heightPixels - 1, _errorPaint);
-            canvas.DrawText($"Width: {widthPixels}", 5, 20, _errorPaint);
-            canvas.DrawText($"Height: {heightPixels}", 5, 40, _errorPaint);
+            canvas.DrawText($"Width: {widthPixels}", 5, 20, _boldFont, _errorPaint);
+            canvas.DrawText($"Height: {heightPixels}", 5, 40, _boldFont, _errorPaint);
+            canvas.DrawText($"AlphaType: {lapChartImage.AlphaType}", 5, 60, _boldFont, _errorPaint);
+            canvas.DrawText($"ColorType: {lapChartImage.ColorType}", 5, 80, _boldFont, _errorPaint);
+            canvas.DrawText(
+                $"ColorSpace: {lapChartImage.ColorSpace}",
+                5,
+                100,
+                _boldFont,
+                _errorPaint
+            );
         }
 
         return surface.Snapshot().ToGraphicsSequence(terminalInfo, heightCells, widthCells);
@@ -385,13 +397,25 @@ public class TimingHistoryDisplay(
             Height = height,
             Width = width,
             Background = SKColors.Transparent,
-            Title = new LabelVisual
-            {
-                Text = title,
-                Paint = _whitePaint,
-                TextSize = 20,
-            },
-            XAxes = [new Axis { MinStep = 1, LabelsPaint = _labelsPaint }],
+            Title = new DrawnLabelVisual(
+                new()
+                {
+                    Text = title,
+                    Paint = _whitePaint,
+                    TextSize = 20,
+                    HorizontalAlign = LiveChartsCore.Drawing.Align.Start,
+                    Padding = new() { Top = 24 },
+                }
+            ),
+            XAxes =
+            [
+                new Axis
+                {
+                    MinStep = 1,
+                    LabelsPaint = _labelsPaint,
+                    Padding = new LiveChartsCore.Drawing.Padding() { Top = 4, Right = 36 },
+                },
+            ],
             YAxes =
             [
                 new Axis
@@ -402,7 +426,10 @@ public class TimingHistoryDisplay(
                     MaxLimit = axisMax,
                     Labeler = labeler,
                     MinStep = yMinStep,
+                    LabelsDensity = 2,
+                    Padding = new LiveChartsCore.Drawing.Padding() { Right = 4 },
                 },
             ],
+            ChartTheme = new() { VirtualBackroundColor = LvcColor.Empty },
         };
 }
