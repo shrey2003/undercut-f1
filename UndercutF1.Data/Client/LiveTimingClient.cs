@@ -38,14 +38,13 @@ public sealed class LiveTimingClient(
         "LapCount",
         "TimingData",
         "TeamRadio",
-        // Only available with subscription?
+        // Only available with subscription
         "CarData.z",
         "Position.z",
         "ChampionshipPrediction",
-        // Not sure if these work now?
         "PitLaneTimeCollection",
+        // Only available after a session?
         "PitStopSeries",
-        "PitStop",
     ];
 
     public HubConnection? Connection { get; private set; }
