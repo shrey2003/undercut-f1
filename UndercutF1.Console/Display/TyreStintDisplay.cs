@@ -8,6 +8,7 @@ public class TyreStintDisplay(
     State state,
     CommonDisplayComponents common,
     PitLaneTimeCollectionProcessor pitLaneTimeCollection,
+    PitStopSeriesProcessor pitStopSeries,
     DriverListProcessor driverList,
     TimingAppDataProcessor timingAppData,
     LapCountProcessor lapCount
@@ -103,9 +104,13 @@ public class TyreStintDisplay(
         var columns = new List<Rows>();
         foreach (var (stintNumber, stint) in line.Stints)
         {
-            var pitStop = pitLaneTimeCollection
+            var pitLaneTime = pitLaneTimeCollection
                 .Latest.PitTimesList.GetValueOrDefault(selectedDriverNumber)
                 ?.ElementAtOrDefault(int.Parse(stintNumber) - 1);
+            var pitStop = pitStopSeries
+                .Latest.PitTimes.GetValueOrDefault(selectedDriverNumber)
+                ?.ElementAtOrDefault(int.Parse(stintNumber) - 1)
+                .Value?.PitStop;
 
             var compoundMarkup = DisplayUtils.GetStyleForTyreCompound(stint.Compound).ToMarkup();
             // Use a consistent tyre compound header to centre it nicely
@@ -129,7 +134,8 @@ public class TyreStintDisplay(
                 ),
                 new($"Total Laps  {stint.TotalLaps:D2}"),
                 new($"Best  {stint.LapTime}"),
-                pitStop is null ? new(" ") : new($"Lane {pitStop?.Duration?.PadLeft(9)}"),
+                pitLaneTime is null ? new(" ") : new($"Lane {pitLaneTime?.Duration?.PadLeft(9)}"),
+                pitStop is null ? new(" ") : new($"Stop {pitStop.PitStopTime?.PadLeft(9)}"),
             };
             columns.Add(new Rows(rows).Collapse());
         }
