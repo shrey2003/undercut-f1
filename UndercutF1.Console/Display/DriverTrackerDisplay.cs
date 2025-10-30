@@ -14,6 +14,23 @@ public class DriverTrackerDisplay : IDisplay
     private const int TOP_OFFSET = 0;
     private const int BOTTOM_OFFSET = 1;
 
+    private static readonly SKTypeface _boldTypeface = SKTypeface.FromFamilyName(
+        "Consolas",
+        weight: SKFontStyleWeight.ExtraBold,
+        width: SKFontStyleWidth.Normal,
+        slant: SKFontStyleSlant.Upright
+    );
+    private static readonly SKTypeface _semiboldTypeface = SKTypeface.FromFamilyName(
+        "Consolas",
+        weight: SKFontStyleWeight.SemiBold,
+        width: SKFontStyleWidth.Normal,
+        slant: SKFontStyleSlant.Upright
+    );
+
+    private static readonly SKFont _normalFont = new(_boldTypeface);
+    private static readonly SKFont _largeFont = new(_boldTypeface, 24);
+    private static readonly SKFont _largeSemiboldFont = new(_semiboldTypeface, 24);
+
     private static readonly SKPaint _trackLinePaint = new()
     {
         Color = SKColor.Parse("666666"),
@@ -23,13 +40,6 @@ public class DriverTrackerDisplay : IDisplay
     private static readonly SKPaint _cornerTextPaint = new()
     {
         Color = SKColor.Parse("DDDDDD"),
-        TextSize = 24,
-        Typeface = SKTypeface.FromFamilyName(
-            "Consolas",
-            weight: SKFontStyleWeight.SemiBold,
-            width: SKFontStyleWidth.Normal,
-            slant: SKFontStyleSlant.Upright
-        ),
         IsAntialias = false,
     };
     private static readonly SKPaint _selectedPaint = new()
@@ -41,15 +51,8 @@ public class DriverTrackerDisplay : IDisplay
     {
         Color = SKColor.Parse("FF0000"),
         IsStroke = true,
-        Typeface = _boldTypeface,
         IsAntialias = false,
     };
-    private static readonly SKTypeface _boldTypeface = SKTypeface.FromFamilyName(
-        "Consolas",
-        weight: SKFontStyleWeight.ExtraBold,
-        width: SKFontStyleWidth.Normal,
-        slant: SKFontStyleSlant.Upright
-    );
 
     private readonly State _state;
     private readonly CommonDisplayComponents _common;
@@ -299,7 +302,7 @@ public class DriverTrackerDisplay : IDisplay
         foreach (var (number, x, y) in circuitCorners)
         {
             // Draw the text to the right of the corner
-            canvas.DrawText(number.ToString(), x + 10, y, _cornerTextPaint);
+            canvas.DrawText(number.ToString(), x + 10, y, _largeSemiboldFont, _cornerTextPaint);
         }
 
         // Add all the selected drivers positions to the map
@@ -321,8 +324,6 @@ public class DriverTrackerDisplay : IDisplay
                     var paint = new SKPaint
                     {
                         Color = SKColor.Parse(driver.TeamColour),
-                        TextSize = 24,
-                        Typeface = _boldTypeface,
                         IsAntialias = false,
                     };
 
@@ -334,7 +335,7 @@ public class DriverTrackerDisplay : IDisplay
                     }
 
                     canvas.DrawCircle(x, y, 5, paint);
-                    canvas.DrawText(driver.Tla, x + 8, y + 8, paint);
+                    canvas.DrawText(driver.Tla, x + 8, y + 8, _largeFont, paint);
                 }
             }
         }
@@ -366,28 +367,38 @@ public class DriverTrackerDisplay : IDisplay
                 $"iTerm2 Support: {_terminalInfo.IsITerm2ProtocolSupported.Value}",
                 5,
                 20,
+                _normalFont,
                 _errorPaint
             );
             canvas.DrawText(
                 $"Kitty Support: {_terminalInfo.IsKittyProtocolSupported.Value}",
                 5,
                 40,
+                _normalFont,
                 _errorPaint
             );
             canvas.DrawText(
                 $"Window H/W: {windowHeight}/{windowWidth} Target/Avail: {targetAspectRatio:F2}/{availableAspectRatio:F2}",
                 5,
                 60,
+                _normalFont,
                 _errorPaint
             );
             canvas.DrawText(
                 $"Synchronized Output Support: {_terminalInfo.IsSynchronizedOutputSupported}",
                 5,
                 80,
+                _normalFont,
                 _errorPaint
             );
-            canvas.DrawText($"Image Scale factor: {_transform.ScaleFactor}", 5, 100, _errorPaint);
-            canvas.DrawText($"Transforms: {_transform}", 5, 120, _errorPaint);
+            canvas.DrawText(
+                $"Image Scale factor: {_transform.ScaleFactor}",
+                5,
+                100,
+                _normalFont,
+                _errorPaint
+            );
+            canvas.DrawText($"Transforms: {_transform}", 5, 120, _normalFont, _errorPaint);
         }
 
         var image = surface.Snapshot();
