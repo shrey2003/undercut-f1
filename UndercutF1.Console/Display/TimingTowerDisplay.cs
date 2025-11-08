@@ -77,6 +77,14 @@ public class TimingTowerDisplay(
         var comparisonDataPoint = timingData.Latest.Lines.FirstOrDefault(x =>
             x.Value.Line == state.CursorOffset
         );
+        var highlightedComparisonDriver = default(string);
+
+        if (state is { CursorOffset: 0, CompareDrivers: (not null, not null) drivers })
+        {
+            var (firstDriver, secondDriver) = SortDriversByPosition(drivers!);
+            comparisonDataPoint = timingData.Latest.Lines.FirstOrDefault(x => x.Key == firstDriver);
+            highlightedComparisonDriver = secondDriver;
+        }
 
         var fastestLastLap = timingData
             .Latest.Lines.Values.MinBy(x => x.LastLapTime?.ToTimeSpan())
@@ -103,7 +111,12 @@ public class TimingTowerDisplay(
             // Driver.Line is only updated at the end of the lap, so if they are different a position change has just happened
             var positionChange = line.Line - driver.Line;
 
-            var isComparisonLine = line == comparisonDataPoint.Value;
+            var isComparisonLine = line == comparisonDataPoint.Value && state.CursorOffset > 0;
+            var comparisonDecoration =
+                highlightedComparisonDriver is not null
+                && highlightedComparisonDriver != driverNumber
+                    ? Decoration.Dim
+                    : Decoration.None;
 
             if (line.Retired.GetValueOrDefault())
             {
@@ -165,7 +178,12 @@ public class TimingTowerDisplay(
                     $"{stint?.Compound?[0]} {stint?.TotalLaps, 2}",
                     DisplayUtils.GetStyle(stint)
                 ),
-                DisplayUtils.GetGapBetweenLines(lines, comparisonDataPoint.Key, driverNumber),
+                DisplayUtils.GetGapBetweenLines(
+                    lines,
+                    comparisonDataPoint.Key,
+                    driverNumber,
+                    comparisonDecoration
+                ),
                 DisplayUtils.DriverTag(driver, line, selected: isComparisonLine)
             );
         }
@@ -375,6 +393,11 @@ public class TimingTowerDisplay(
 
     private IRenderable GetInfoPanel()
     {
+        if (state.CompareDrivers is (not null, not null))
+        {
+            return GetTwoDriverComparePanel();
+        }
+
         if (state.CursorOffset > 0)
         {
             if (sessionInfoProcessor.Latest.IsRace())
@@ -439,6 +462,59 @@ public class TimingTowerDisplay(
         }
 
         return new Columns(charts).PadLeft(1).Expand();
+    }
+
+    private IRenderable GetTwoDriverComparePanel()
+    {
+        var lines = timingData.Latest.Lines;
+        var (firstDriver, secondDriver) = state.CompareDrivers;
+
+        if (string.IsNullOrWhiteSpace(firstDriver) || string.IsNullOrWhiteSpace(secondDriver))
+            return new Text("Unknown error, driver is null when it shouldn't be");
+
+        (firstDriver, secondDriver) = SortDriversByPosition((firstDriver, secondDriver));
+
+        var columns = new List<IRenderable>();
+
+        var chart = GetComparisonChart(firstDriver, secondDriver, lines[firstDriver]);
+        if (chart is not null)
+            columns.Add(chart);
+
+        columns.Add(GetRecentDriverLaps(firstDriver));
+        columns.Add(GetRecentDriverLaps(secondDriver));
+
+        return new Columns(columns).PadLeft(1).Expand();
+    }
+
+    private (string, string) SortDriversByPosition((string, string) drivers)
+    {
+        var (firstDriver, secondDriver) = drivers;
+        var lines = timingData.Latest.Lines;
+        // Swap the drivers the make sure gaps are always positive
+        if (lines[firstDriver].Line > lines[secondDriver].Line)
+            (firstDriver, secondDriver) = (secondDriver, firstDriver);
+
+        return (firstDriver, secondDriver);
+    }
+
+    private IRenderable GetRecentDriverLaps(string driverNumber)
+    {
+        var previousLaps = timingData
+            .DriversByLap.Values.Select(x => x.GetValueOrDefault(driverNumber))
+            .OfType<TimingDataPoint.Driver>()
+            .OrderByDescending(x => x.NumberOfLaps)
+            .Take(5)
+            .ToList();
+
+        var lapRows = previousLaps.Select(lap => new Text(
+            $"LAP {lap.NumberOfLaps:D2}: {lap.LastLapTime?.Value}"
+        ));
+
+        var driver = driverList.Latest[driverNumber];
+
+        return new Rows(
+            [new Markup(DisplayUtils.MarkedUpDriverNumber(driver)).Centered(), .. lapRows]
+        );
     }
 
     private BarChart? GetComparisonChart(
@@ -514,7 +590,7 @@ public class TimingTowerDisplay(
             _ when gap < gapOnPreviousLap => Color.Green,
             _ => Color.Silver,
         };
-        chart.AddItem($"LAP {lapNumber}", (double)gap, color);
+        chart.AddItem($"LAP {lapNumber:D2}", (double)gap, color);
     }
 
     private decimal GetGapBetweenDriversOnLap(
@@ -557,8 +633,8 @@ public class TimingTowerDisplay(
             .DriversByLap.Values.Select(x => x.GetValueOrDefault(driverNumber))
             .Where(x => x?.SessionPart == sessionPart && !x.IsPitLap)
             .OfType<TimingDataPoint.Driver>()
-            .Take(5)
             .OrderByDescending(x => x.NumberOfLaps)
+            .Take(5)
             .ToList();
 
         var fastestLap = lapsInSessionPart.MinBy(x => x.LastLapTime?.ToTimeSpan());
@@ -566,7 +642,7 @@ public class TimingTowerDisplay(
         var lapRows = lapsInSessionPart.Select(lap =>
         {
             var style = lap == fastestLap ? DisplayUtils.STYLE_PB : Style.Plain;
-            return new Text($"LAP {lap.NumberOfLaps:D2}: {lap.LastLapTime?.Value}", style);
+            return new Text($"LAP {lap.NumberOfLaps - 1:D2}: {lap.LastLapTime?.Value}", style);
         });
 
         List<Text> rows = [new Text($"Q{sessionPart}").Centered(), .. lapRows];
