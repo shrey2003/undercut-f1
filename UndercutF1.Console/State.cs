@@ -17,4 +17,6 @@ public record State
     }
 
     public int CursorOffset { get; set; } = 0;
+
+    public (string? First, string? Second) CompareDrivers { get; set; } = (null, null);
 }
