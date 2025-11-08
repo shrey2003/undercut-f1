@@ -157,23 +157,7 @@ public static partial class CommandHandler
                     AnsiConsole.WriteLine();
                 }
             )
-            .InitScript(
-                """
-                function getCookie(name) {
-                    return (name = (document.cookie + ';').match(new RegExp(name + '=.*;'))) && name[0].split(/=|;/)[1];
-                }
-
-                var previousCookie = "";
-                setInterval(() => {
-                    let cookie = getCookie('login-session');
-                    if (cookie && previousCookie !== cookie) {
-                        sendLoginCookie(cookie);
-                        previousCookie = cookie;
-                        document.body.insertAdjacentText('afterbegin', 'Login Complete, you may now close the browser');
-                    }
-                }, 1000);
-                """
-            )
+            .InitScript(GetInitScript())
             .Navigate(new UrlContent("https://account.formula1.com/#/en/login"))
             // Run() blocks until the WebView is closed.
             .Run();
@@ -187,6 +171,65 @@ public static partial class CommandHandler
         }
 
         return cookie;
+    }
+
+    private static string GetInitScript()
+    {
+        var cookieHandling = """
+            function getCookie(name) {
+                return (name = (document.cookie + ';').match(new RegExp(name + '=.*;'))) && name[0].split(/=|;/)[1];
+            }
+
+            var previousCookie = "";
+            setInterval(() => {
+                let cookie = getCookie('login-session');
+                if (cookie && previousCookie !== cookie) {
+                    sendLoginCookie(cookie);
+                    previousCookie = cookie;
+                    document.body.insertAdjacentText('afterbegin', 'Login Complete, you may now close the browser');
+                }
+            }, 1000);
+            """;
+
+        if (OperatingSystem.IsMacOS())
+        {
+            // WebView on Mac doesn't handle keyboard shortcuts properly, so add handling manually
+            // See https://github.com/webview/webview/issues/403#issuecomment-787569812
+            // And https://github.com/facebook/sapling/commit/3c9d72bc43b17abe4a89cef63f22eee8a60269c2
+            return $$"""
+                {{cookieHandling}}
+
+                window.addEventListener('keypress', (event) => {
+                    if (!event.metaKey) { return; }
+                    switch (event.key) {
+                        case 'c':
+                            document.execCommand('copy');
+                            event.preventDefault();
+                            return;
+                        case 'x':
+                            document.execCommand('cut');
+                            event.preventDefault();
+                            return;
+                        case 'v':
+                            document.execCommand('paste');
+                            event.preventDefault();
+                            return;
+                        case 'a':
+                            document.execCommand('selectAll');
+                            event.preventDefault();
+                            return;
+                        case 'z':
+                            document.execCommand('undo');
+                            event.preventDefault();
+                            return;
+                    }
+                });
+                """;
+        }
+        else
+        {
+            return cookieHandling;
+        }
     }
 
     private static async Task<JsonObject> ReadConfigFileAsync()
