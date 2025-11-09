@@ -47,6 +47,7 @@ Feature Highlights:
 - [UndercutF1 in Action](#undercutf1-in-action)
   - [Timing Tower during a Race](#timing-tower-during-a-race)
   - [Using a Cursor to Display Relative Gap for a Specific Driver](#using-a-cursor-to-display-relative-gap-for-a-specific-driver)
+  - [Track Gaps between Two Drivers Over Time](#track-gaps-between-two-drivers-over-time)
   - [Timing Tower during Practice/Qualifying](#timing-tower-during-practicequalifying)
   - [Race Control Page](#race-control-page)
   - [Driver Tracker](#driver-tracker)
@@ -99,6 +100,16 @@ Use the cursor controlled by the <kbd>▼</kbd>/<kbd>▲</kbd> `Cursor` actions 
 Additionally, the gap between the selected drivers and those around them over the last four laps will be displayed at the bottom of the screen. This allows you to easily see evolving gaps over time and evaluate how soon a driver may catch up or pull away.
 
 ![Relative gaps for a specific driver](docs/screenshots/relative-gap-race.png)
+
+### Track Gaps between Two Drivers Over Time
+
+Similar to the above comparison feature, you can also select two drivers to enter a persistent comparison mode, by using the <kbd>C</kbd> `Select for Compare` action when your cursor is over a particular driver. Selecting two drivers in this way will replace the normal comparison panel with a persistent comparison between the two selected drivers.
+
+This allows you to easily monitor the gaps between two drivers who are not next to eachother on track, for example if they are on contra tyre strategies or to monitor a driver pit window against another driver.
+
+Once you select the two driver to compare, move your cursor back to the top (position 0) to have the Compare column show relative gaps to the first selected driver.
+
+![Two driver selected for compare](docs/screenshots/compare-drivers.png)
 
 ### Timing Tower during Practice/Qualifying
 
