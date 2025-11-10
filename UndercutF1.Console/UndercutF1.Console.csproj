@@ -13,6 +13,7 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" />
     <PackageReference Include="InhibitSleep.Net" />
     <PackageReference Include="InMemoryLogger" />
     <PackageReference Include="LiveChartsCore" />
@@ -27,7 +28,7 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="SharpWebview" />
     <PackageReference Include="SkiaSharp" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" />
     <PackageReference Include="SkiaSharp.NativeAssets.Win32" />
     <PackageReference Include="Spectre.Console" />
