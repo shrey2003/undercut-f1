@@ -512,9 +512,10 @@ public class TimingTowerDisplay(
 
         var driver = driverList.Latest[driverNumber];
 
-        return new Rows(
-            [new Markup(DisplayUtils.MarkedUpDriverNumber(driver)).Centered(), .. lapRows]
-        );
+        return new Rows([
+            new Markup(DisplayUtils.MarkedUpDriverNumber(driver)).Centered(),
+            .. lapRows,
+        ]);
     }
 
     private BarChart? GetComparisonChart(

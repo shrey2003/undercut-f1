@@ -100,12 +100,10 @@ public class RaceControlDisplay(
             );
         }
 
-        items.AddRange(
-            [
-                new Text(sessionInfo.Latest.Meeting?.Circuit?.ShortName ?? string.Empty),
-                new Text(sessionInfo.Latest.Name ?? string.Empty),
-            ]
-        );
+        items.AddRange([
+            new Text(sessionInfo.Latest.Meeting?.Circuit?.ShortName ?? string.Empty),
+            new Text(sessionInfo.Latest.Name ?? string.Empty),
+        ]);
 
         var rows = new Rows(items);
         return new Panel(rows)
