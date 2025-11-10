@@ -132,6 +132,13 @@ public static partial class CommandHandler
 
     private static string? LoginWithWebView()
     {
+        if (OperatingSystem.IsLinux())
+        {
+            // Workaround for Nvidia driver issues and Wayland
+            // See https://github.com/JustAman62/undercut-f1/issues/144
+            Environment.SetEnvironmentVariable("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        }
+
         using var webView = new Webview(debug: false, interceptExternalLinks: false);
 
         var cookie = default(string);
